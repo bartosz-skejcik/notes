@@ -1,12 +1,17 @@
 package main
 
 import (
+	"backend/internal/database"
 	"log"
 
 	"github.com/gofiber/fiber/v3"
 )
 
 func main() {
+
+    // Initialize the database connection
+    database.Init()
+
     // Initialize a new Fiber app
     app := fiber.New()
 
