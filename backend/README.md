@@ -1,6 +1,6 @@
-# MyProject Backend 🚀
+# Notes Backend 🚀
 
-Welcome to the backend of MyProject! This guide will help you understand the file structure and get your environment up and running. Let's dive in!
+Welcome to the backend of Notes! This guide will help you understand the file structure and get your environment up and running. Let's dive in!
 
 ## 🗂 Project Structure
 
