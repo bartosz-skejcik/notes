@@ -1,55 +1,83 @@
--- Create the users table
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    display_name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- Create the 'users' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR PRIMARY KEY,
+    email VARCHAR UNIQUE NOT NULL,
+    password_hash VARCHAR NOT NULL,
+    display_name VARCHAR,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create the entries table
-CREATE TABLE entries (
-    id UUID PRIMARY KEY,
-    user_id UUID REFERENCES users(id),
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    date DATE NOT NULL,
-    type VARCHAR(50) NOT NULL
+-- Create the 'entries' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS entries (
+    id VARCHAR PRIMARY KEY,
+    user_id VARCHAR REFERENCES users(id),
+    title VARCHAR NOT NULL,
+    content TEXT,  -- Storing markdown as text
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parent_entry_id VARCHAR REFERENCES entries(id) ON DELETE SET NULL,
+    has_photo BOOLEAN DEFAULT FALSE,
+    type VARCHAR NOT NULL
 );
 
--- Create the entry_relations table
-CREATE TABLE entry_relations (
-    id UUID PRIMARY KEY,
-    parent_entry_id UUID REFERENCES entries(id),
-    child_entry_id UUID REFERENCES entries(id)
+-- Create the 'photos' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS photos (
+    id VARCHAR PRIMARY KEY,
+    entry_id VARCHAR REFERENCES entries(id) ON DELETE CASCADE,
+    image_data BYTEA NOT NULL,
+    mime_type VARCHAR NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create the tags table
-CREATE TABLE tags (
-    id UUID PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    user_id UUID REFERENCES users(id)
+-- Create the 'tags' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS tags (
+    id VARCHAR PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    user_id VARCHAR REFERENCES users(id)
 );
 
--- Create the entry_tags table
-CREATE TABLE entry_tags (
-    id UUID PRIMARY KEY,
-    entry_id UUID REFERENCES entries(id),
-    tag_id UUID REFERENCES tags(id)
+-- Create the 'entry_tags' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS entry_tags (
+    id VARCHAR PRIMARY KEY,
+    entry_id VARCHAR REFERENCES entries(id) ON DELETE CASCADE,
+    tag_id VARCHAR REFERENCES tags(id) ON DELETE CASCADE
 );
 
--- Add indexes for faster querying
-CREATE INDEX idx_users_email ON users(email);
+-- Create the 'settings' table if it doesn't exist
+CREATE TABLE IF NOT EXISTS settings (
+    id VARCHAR PRIMARY KEY,
+    user_id VARCHAR REFERENCES users(id),
+    key VARCHAR NOT NULL,
+    value VARCHAR NOT NULL
+);
 
-CREATE INDEX idx_entries_user_id ON entries(user_id);
-CREATE INDEX idx_entries_date ON entries(date);
-CREATE INDEX idx_entries_type ON entries(type);
+-- Indexes for faster querying
 
-CREATE INDEX idx_entry_relations_parent_entry_id ON entry_relations(parent_entry_id);
-CREATE INDEX idx_entry_relations_child_entry_id ON entry_relations(child_entry_id);
+-- Index for users.email (already unique)
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
-CREATE INDEX idx_tags_user_id ON tags(user_id);
-CREATE INDEX idx_tags_name ON tags(name);
+-- Index for entries.user_id
+CREATE INDEX IF NOT EXISTS idx_entries_user_id ON entries(user_id);
 
-CREATE INDEX idx_entry_tags_entry_id ON entry_tags(entry_id);
-CREATE INDEX idx_entry_tags_tag_id ON entry_tags(tag_id);
+-- Index for entries.timestamp
+CREATE INDEX IF NOT EXISTS idx_entries_timestamp ON entries(timestamp);
+
+-- Index for entries.parent_entry_id
+CREATE INDEX IF NOT EXISTS idx_entries_parent_entry_id ON entries(parent_entry_id);
+
+-- Index for photos.entry_id
+CREATE INDEX IF NOT EXISTS idx_photos_entry_id ON photos(entry_id);
+
+-- Index for tags.user_id
+CREATE INDEX IF NOT EXISTS idx_tags_user_id ON tags(user_id);
+
+-- Index for entry_tags.entry_id
+CREATE INDEX IF NOT EXISTS idx_entry_tags_entry_id ON entry_tags(entry_id);
+
+-- Index for entry_tags.tag_id
+CREATE INDEX IF NOT EXISTS idx_entry_tags_tag_id ON entry_tags(tag_id);
+
+-- Index for settings.user_id
+CREATE INDEX IF NOT EXISTS idx_settings_user_id ON settings(user_id);
+
+-- Index for settings.key to optimize key-value lookups
+CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);
