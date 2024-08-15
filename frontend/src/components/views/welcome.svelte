@@ -17,12 +17,12 @@
 <main
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
-	<div class="flex flex-col items-center space-y-4">
+	<div class="flex flex-col items-center space-y-4 text-muted-foreground">
 		<NotebookText strokeWidth={1.4} class="p-4 text-foreground bg-muted rounded-xl w-28 h-28" />
 		<h1 class="text-3xl xl:text-4xl">{session?.display_name.split(' ')[0]}{"'"}s Notes</h1>
 	</div>
 	<Button
-		class="flex items-center justify-center gap-2 text-foreground bg-brand hover:bg-brand/90"
+		class="flex items-center justify-center gap-2 text-white bg-brand hover:bg-brand/90"
 		variant="default"
 		on:click={handleClick}
 	>
@@ -42,7 +42,7 @@
 							</Button>
 							<Button
 								on:click={() => navigate(`/notebooks/${notebook.id}`)}
-								class="text-foreground bg-brand hover:bg-brand/90"
+								class="text-white bg-brand hover:bg-brand/90"
 								variant="default">Open</Button
 							>
 						</div>
