@@ -26,6 +26,9 @@ importers:
       mode-watcher:
         specifier: ^0.4.1
         version: 0.4.1(svelte@5.0.0-next.210)
+      svelte-radix:
+        specifier: ^1.1.0
+        version: 1.1.0(svelte@5.0.0-next.210)
       tailwind-merge:
         specifier: ^2.4.0
         version: 2.4.0
@@ -1579,6 +1582,11 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  svelte-radix@1.1.0:
+    resolution: {integrity: sha512-kyE9wZiJV937INGb+wiBkAjmGtQUUYRPkVL2Q+/gj+9Vog1Ewd2wNvNmpNMUd+c+euxoc5u5YZMuCUgky9EUPw==}
+    peerDependencies:
+      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0
 
   svelte@5.0.0-next.210:
     resolution: {integrity: sha512-6QZpzr31weKDyAKifOdXJHK9oEeBE2Z/z/h1IX4tmJRuWPE/2Wc7Lzpfxl+0irS19GZH6V5YZnZLNTRJKjGzfg==}
@@ -3191,6 +3199,10 @@ snapshots:
       postcss: 8.4.41
       postcss-load-config: 4.0.2(postcss@8.4.41)
       typescript: 5.5.4
+
+  svelte-radix@1.1.0(svelte@5.0.0-next.210):
+    dependencies:
+      svelte: 5.0.0-next.210
 
   svelte@5.0.0-next.210:
     dependencies:
