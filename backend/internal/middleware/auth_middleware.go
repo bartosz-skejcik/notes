@@ -35,7 +35,7 @@ func (a *AuthMiddleware) CheckAuth(c *fiber.Ctx) error {
 
 	_, err := a.SessionManager.GetSession(sessionId)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: "invalid session"})
 	}
 
 	return c.Next()

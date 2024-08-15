@@ -71,7 +71,7 @@ export const actions: Actions = {
 			} else {
 				// @ts-expect-error asd
 				console.error('Request error:', error.message);
-				return fail(500, { form, error: 'Internal server error' });
+				throw redirect(301, '/');
 			}
 		}
 	}

@@ -9,15 +9,13 @@
 	export let data;
 
 	const { form, errors, enhance, constraints } = superForm(data.form);
-
-	$: console.log(data);
 </script>
 
 <main
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
 	<form method="POST" use:enhance>
-		<Card.Root class="w-full max-w-sm text-start">
+		<Card.Root class="w-full max-w-sm border-none text-start">
 			<Card.Header>
 				<Card.Title class="text-2xl">Login</Card.Title>
 				<Card.Description>Enter your email below to login to your account.</Card.Description>

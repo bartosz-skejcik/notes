@@ -29,7 +29,7 @@ import (
 //		@description				Token in Bearer format to authenticate the user
 //		@host		localhost:3000
 //	    @BasePath	/api
-func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware) *fiber.App {
+func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler) *fiber.App {
 
     // Initialize a new Fiber app
     app := fiber.New()
@@ -51,6 +51,11 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
 	auth.Post("/sign-in", userHandlers.SignInUser)
 	auth.Get("/me", authMiddleware.CheckAuth, userHandlers.GetUserInfo)
 	auth.Post("/sign-out", userHandlers.SignOutUser)
+
+    notebooks := api.Group("/notebooks")
+    notebooks.Get("", authMiddleware.CheckAuth, notebookHandlers.GetNotebooks)
+    notebooks.Post("", authMiddleware.CheckAuth, notebookHandlers.CreateNotebook)
+    notebooks.Get("/:notebookId", authMiddleware.CheckAuth, notebookHandlers.GetNotebook)
 
 
     // Health check route
@@ -91,6 +96,8 @@ func main() {
             handlers.NewUserHandler,
             storage.NewUserStorage,
             middleware.NewAuthMiddleware,
+            handlers.NewNotebookHandler,
+            storage.NewNotebookStorage,
         ),
         fx.Invoke(NewFiberServer),
     ).Run()
