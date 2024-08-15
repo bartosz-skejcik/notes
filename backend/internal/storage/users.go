@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 )
 
 type UserStorage struct {
@@ -26,7 +25,7 @@ func (s *UserStorage) CreateUser(user *NewUser) (int, error) {
         "INSERT INTO users (display_name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
         user.DisplayName, user.Email, user.Password,
     ).Scan(&userId); err != nil {
-        return 0, fmt.Errorf("failed to create user: %v", err)
+        return 0, err
     }
 
     return userId, nil

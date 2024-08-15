@@ -34,6 +34,7 @@ type User struct {
 	DisplayName string `db:"display_name"`
 	Email string `db:"email"`
 	PasswordHash string `db:"password_hash"`
+	CreatedAt time.Time `db:"created_at"`
 }
 
 func (s *SessionManager) CreateSession(user *UserSession) (string, error) {
@@ -46,34 +47,32 @@ func (s *SessionManager) CreateSession(user *UserSession) (string, error) {
 	return sessionId, nil
 }
 
-func (s *SessionManager) SignIn(email, password string) (*UserSession, error) {
+func (s *SessionManager) SignIn(email, password string) (string, error) {
 	// Check if the user exists
 	var user User
-	if err := s.Conn.QueryRow("SELECT * FROM users WHERE email = $1", email).Scan(&user); err != nil {
-		return nil, err
+	if err := s.Conn.QueryRow("SELECT id, display_name, email, password_hash, created_at FROM users WHERE email = $1", email).Scan(&user.Id, &user.DisplayName, &user.Email, &user.PasswordHash, &user.CreatedAt); err != nil {
+		return "", err
 	}
 
-	// Check if the password matches
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return nil, err
-	}
-
-	// Create a new session for the user
-	_, err := s.CreateSession(&UserSession{
-		Id: user.Id,
-		DisplayName: user.DisplayName,
-		Email: user.Email,
-	})
-
+	// check if the password matches
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &UserSession{
-		Id: user.Id,
+	// create the session
+	sessionId := uuid.NewString()
+	jsonData, _ := json.Marshal(UserSession{
+		Id:        user.Id,
 		DisplayName: user.DisplayName,
-		Email: user.Email,
-	}, nil
+		Email:     user.Email,
+	})
+	err = s.Rdb.Set(context.Background(), sessionId, string(jsonData), 24*time.Hour).Err()
+	if err != nil {
+		return "", err
+	}
+
+	return sessionId, nil
 }
 
 func (s *SessionManager) SignOut(sessionId string) error {

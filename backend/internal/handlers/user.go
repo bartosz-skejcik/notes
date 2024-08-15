@@ -123,8 +123,6 @@ func (handler *UserHandler) SignInUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
 	}
 
-	fmt.Println(user)
-
 	// validate the user struct
 	validate := validator.New()
 	err = validate.Struct(user)
@@ -135,13 +133,13 @@ func (handler *UserHandler) SignInUser(c *fiber.Ctx) error {
 	// sign the user in
 	sessionId, err := handler.SessionManager.SignIn(user.Email, user.Password)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
+		return c.Status(fiber.StatusUnauthorized).JSON(Response{Success: false, Message: "Invalid email or password"})
 	}
 
 	// set the session id as a header
-	c.Response().Header.Set("Authorization", fmt.Sprintf("Bearer %d", sessionId.Id))
+	c.Response().Header.Set("Authorization", fmt.Sprintf("Bearer %s", sessionId))
 
-	return c.JSON(Response{Success: true, Message: "Successfully signed in"})
+	return c.Status(fiber.StatusOK).JSON(Response{Success: true, Message: "Successfully signed in"})
 }
 
 // @Summary Sign out a user

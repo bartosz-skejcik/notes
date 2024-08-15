@@ -1,7 +1,8 @@
 <script lang="ts">
-    import Welcome from "$components/views/welcome.svelte";
+	import Welcome from '$components/views/welcome.svelte';
+	import type { PageData } from './$types';
 
-    export let data;
+	export let data: PageData;
 </script>
 
-<Welcome data={data} />
+<Welcome {...data} />
