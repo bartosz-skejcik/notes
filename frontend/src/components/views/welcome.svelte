@@ -8,6 +8,10 @@
 	function handleClick() {
 		window.location.href = '/new-notebook';
 	}
+
+	function navigate(path: string) {
+		window.location.href = path;
+	}
 </script>
 
 <main
@@ -36,8 +40,10 @@
 							<Button variant="ghost" class="px-3 hover:text-red-500">
 								<Trash class="w-4 h-4" />
 							</Button>
-							<Button class="text-foreground bg-brand hover:bg-brand/90" variant="default"
-								>Open</Button
+							<Button
+								on:click={() => navigate(`/notebooks/${notebook.id}`)}
+								class="text-foreground bg-brand hover:bg-brand/90"
+								variant="default">Open</Button
 							>
 						</div>
 					</div>

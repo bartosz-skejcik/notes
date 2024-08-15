@@ -39,6 +39,7 @@
 		"axios": "^1.7.4",
 		"bits-ui": "^0.21.13",
 		"clsx": "^2.1.1",
+		"cmdk-sv": "^0.0.18",
 		"js-cookie": "^3.0.5",
 		"lucide-svelte": "^0.427.0",
 		"mode-watcher": "^0.4.1",
