@@ -1,0 +1,164 @@
+definitions:
+  auth.UserSession:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+    type: object
+  handlers.SuccessResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  handlers.signInRequestBody:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.signUpSuccessResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  handlers.userRequestBody:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - display_name
+    - email
+    - password
+    type: object
+info:
+  contact: {}
+  description: This is an API for a note taking app
+  title: Go Notes API
+  version: "0.1"
+paths:
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the user's info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.UserSession'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+      summary: Get the user's info
+      tags:
+      - users
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Sign in a user
+      parameters:
+      - description: The user's email and password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.signInRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+      summary: Sign in a user
+      tags:
+      - users
+  /auth/sign-out:
+    post:
+      consumes:
+      - application/json
+      description: Sign out a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+      summary: Sign out a user
+      tags:
+      - users
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Sign up a user
+      parameters:
+      - description: The user's first name, last name, email, and password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.userRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.signUpSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+      summary: Sign up a user
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: Token in Bearer format to authenticate the user
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
