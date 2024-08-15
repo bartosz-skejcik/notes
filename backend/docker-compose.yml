@@ -2,17 +2,27 @@ version: "3.8"
 
 services:
     db:
-        image: postgres:latest
-        container_name: my_postgres
+        image: postgres
+        container_name: notes_postgres
         environment:
-            POSTGRES_USER: myuser
-            POSTGRES_PASSWORD: mypassword
-            POSTGRES_DB: mydb
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: notes
         ports:
             - "5432:5432"
         volumes:
+            - /home/j5on/.work/personal/notes/backend/internal/database:/docker-entrypoint-initdb.d
             - db_data:/var/lib/postgresql/data
-            - ./internal/database:/docker-entrypoint-initdb.d
+    redis:
+        image: redis
+        container_name: notes_redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - type: volume
+              source: redis_data
+              target: /data
 
 volumes:
     db_data:
+    redis_data:
