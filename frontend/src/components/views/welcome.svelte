@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$ui/button';
-	import { ArrowRight, Trash } from 'lucide-svelte/icons';
+	import { ArrowRight, NotebookText, Trash } from 'lucide-svelte/icons';
 	import type { PageData } from '../../routes/$types';
 
 	let { notebooks, session }: PageData = $props();
@@ -9,7 +9,8 @@
 <main
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
-	<div class="w-28 aspect-square bg-muted-foreground"></div>
+	<!-- <div class="w-28 aspect-square bg-muted-foreground"></div> -->
+	<NotebookText strokeWidth={1.4} class="p-4 text-white bg-muted rounded-xl w-28 h-28" />
 	<!-- TODO: add a logo -->
 	<h1 class="text-3xl xl:text-4xl">{session?.display_name}{"'"}s Notes</h1>
 	<Button
