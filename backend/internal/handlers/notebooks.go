@@ -36,8 +36,8 @@ func NewNotebookHandler(storage *storage.NotebookStorage, sessionManager *auth.S
 // @Accept json
 // @Produce json
 // @Success 200 {array} []storage.Notebook
-// @Failure 400 {object} handlers.Response{Success: false}
-// @Failure 500 {object} handlers.Response{Success: false}
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
 // @Router /notebooks [get]
 func (n *NotebookHandler) GetNotebooks(c *fiber.Ctx) error {
 	// get the session from the authorization header
@@ -69,8 +69,8 @@ func (n *NotebookHandler) GetNotebooks(c *fiber.Ctx) error {
 // @Produce json
 // @Param notebook body notebookRequestBody true "The notebook's name"
 // @Success 200 {object} notebookSuccessResponse
-// @Failure 400 {object} handlers.Response{Success: false}
-// @Failure 500 {object} handlers.Response{Success: false}
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
 // @Router /notebooks [post]
 func (n *NotebookHandler) CreateNotebook(c *fiber.Ctx) error {
 	// get the session from the authorization header
@@ -124,8 +124,8 @@ func (n *NotebookHandler) CreateNotebook(c *fiber.Ctx) error {
 // @Produce json
 // @Param notebookId path int true "The notebook's id"
 // @Success 200 {object} storage.Notebook
-// @Failure 400 {object} handlers.Response{Success: false}
-// @Failure 500 {object} handlers.Response{Success: false}
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
 // @Router /notebooks/{notebookId} [get]
 func (n *NotebookHandler) GetNotebook(c *fiber.Ctx) error {
 	// get the notebook id from the path
@@ -141,4 +141,28 @@ func (n *NotebookHandler) GetNotebook(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(notebook)
+}
+
+// @Summary Delete a notebook
+// @Description Delete a notebook
+// @Tags notebooks
+// @Accept json
+// @Produce json
+// @Param notebookId path int true "The notebook's id"
+// @Success 200 {object} handlers.Response{Success: true}
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
+// @Router /notebooks/{notebookId} [delete]
+func (n *NotebookHandler) DeleteNotebook(c *fiber.Ctx) error {
+	notebookId, err := strconv.Atoi(c.Params("notebookId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	err = n.Storage.DeleteNotebook(notebookId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(Response{Success: true})
 }

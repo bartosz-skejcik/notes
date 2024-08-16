@@ -86,3 +86,16 @@ func (s *NotebookStorage) GetNotebookById(notebookId int) (Notebook, error) {
 
 	return notebook, nil
 }
+
+func (s *NotebookStorage) DeleteNotebook(notebookId int) error {
+	_, err := s.Conn.Exec(
+		"DELETE FROM notebooks WHERE id = $1",
+		notebookId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -25,20 +25,21 @@ CREATE TABLE IF NOT EXISTS tags (
 CREATE TABLE IF NOT EXISTS entries (
     id SERIAL PRIMARY KEY,
     notebook_id INT REFERENCES notebooks(id),
+    author_id INT REFERENCES users(id),
     tag_id INT REFERENCES tags(id),
     title VARCHAR NOT NULL,
-    content TEXT,
+    content TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     parent_entry_id INT REFERENCES entries(id),
-    has_photo BOOLEAN DEFAULT FALSE,
-    type VARCHAR
+    has_photo BOOLEAN DEFAULT FALSE
 );
 
 -- Create the photos table
 CREATE TABLE IF NOT EXISTS photos (
     id SERIAL PRIMARY KEY,
     entry_id INT REFERENCES entries(id),
-    image_data BYTEA,
+    author_id INT REFERENCES users(id),
+    image_data BYTEA NOT NULL,
     mime_type VARCHAR NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -55,6 +56,8 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_notebooks_user_id ON notebooks(user_id);
 CREATE INDEX IF NOT EXISTS idx_entries_notebook_id ON entries(notebook_id);
+CREATE INDEX IF NOT EXISTS idx_entries_user_id ON entries(author_id);
 CREATE INDEX IF NOT EXISTS idx_entries_tag_id ON entries(tag_id);
 CREATE INDEX IF NOT EXISTS idx_photos_entry_id ON photos(entry_id);
+CREATE INDEX IF NOT EXISTS idx_photos_author_id ON photos(author_id);
 CREATE INDEX IF NOT EXISTS idx_settings_user_id ON settings(user_id);

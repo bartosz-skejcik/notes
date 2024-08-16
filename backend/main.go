@@ -29,7 +29,7 @@ import (
 //		@description				Token in Bearer format to authenticate the user
 //		@host		localhost:3000
 //	    @BasePath	/api
-func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler) *fiber.App {
+func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler) *fiber.App {
 
     // Initialize a new Fiber app
     app := fiber.New()
@@ -56,6 +56,17 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
     notebooks.Get("", authMiddleware.CheckAuth, notebookHandlers.GetNotebooks)
     notebooks.Post("", authMiddleware.CheckAuth, notebookHandlers.CreateNotebook)
     notebooks.Get("/:notebookId", authMiddleware.CheckAuth, notebookHandlers.GetNotebook)
+    notebooks.Delete("/:notebookId", authMiddleware.CheckAuth, notebookHandlers.DeleteNotebook)
+
+    // entries
+    notebooks.Get("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.GetEntries)
+    notebooks.Post("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.CreateEntry)
+    notebooks.Post("/:notebookId/entries/child", authMiddleware.CheckAuth, entryHandlers.CreateChildEntry)
+    notebooks.Get("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.GetEntryById)
+    notebooks.Get("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.GetEntryChildren)
+    notebooks.Get("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.GetEntryPhotos)
+    notebooks.Post("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.CreatePhoto)
+
 
 
     // Health check route
@@ -98,6 +109,8 @@ func main() {
             middleware.NewAuthMiddleware,
             handlers.NewNotebookHandler,
             storage.NewNotebookStorage,
+            storage.NewEntryStorage,
+            handlers.NewEntryHandler,
         ),
         fx.Invoke(NewFiberServer),
     ).Run()
