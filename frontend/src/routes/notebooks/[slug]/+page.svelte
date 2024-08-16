@@ -7,6 +7,7 @@
 
 	import { Settings, Home } from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import EntryForm from '$components/entry-form.svelte';
 
 	let { data } = $props();
 
@@ -78,9 +79,9 @@
 		}
 	}
 
-	onMount(async () => {
-		await streamResponse();
-	});
+	// onMount(async () => {
+	// 	await streamResponse();
+	// });
 </script>
 
 <nav class="flex items-center justify-between px-3 py-2">
@@ -115,10 +116,8 @@
 	</div>
 </nav>
 <div class="p-3">
-	<h1>
-		Notebook {data.slug}
-	</h1>
+	<EntryForm />
 	{#each messages as message}
-		<p>{message.content}</p>
+		<p class="text-lg">{message.content}</p>
 	{/each}
 </div>
