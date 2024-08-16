@@ -54,6 +54,11 @@
 					<p class="text-red-500">{data.error}</p>
 				{/if}
 				<Button type="submit" class="w-full">Sign in</Button>
+
+				<div class="mt-4 text-sm text-start">
+					Don't have an account?
+					<a href="/register" class="underline"> Sign up </a>
+				</div>
 			</Card.Footer>
 		</Card.Root>
 	</form>
