@@ -30,7 +30,9 @@
 		<ArrowRight class="w-4 h-4" />
 	</Button>
 	<div class="flex flex-col items-center w-full max-w-xs space-y-4">
-		<p class="text-muted-foreground">or open an existing one</p>
+		{#if notebooks.length > 0}
+			<p class="text-muted-foreground">or open an existing one</p>
+		{/if}
 		<div class="flex flex-col items-center justify-center w-full gap-y-1">
 			{#if notebooks}
 				{#each notebooks! as notebook}
