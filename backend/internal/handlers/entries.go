@@ -44,17 +44,17 @@ type EntryHandler struct {
 // }
 
 type entryRequestBody struct {
-	NotebookId int `json:"notebook_id" validate:"required"`
+	NotebookId int
 	Title string `json:"title" validate:"required"`
-	Content string `json:"content" validate:"required"`
+	Content string `json:"content"`
 	HasPhoto bool `json:"has_photo"`
 	TagId int `json:"tag_id"`
 }
 
 type childEntryRequestBody struct {
-	NotebookId int `json:"notebook_id" validate:"required"`
+	NotebookId int
 	Title string `json:"title" validate:"required"`
-	Content string `json:"content" validate:"required"`
+	Content string `json:"content"`
 	ParentEntryId int `json:"parent_entry_id" validate:"required"`
 	TagId int `json:"tag_id"`
 }
@@ -170,7 +170,7 @@ func (e *EntryHandler) CreateEntry(c *fiber.Ctx) error {
 		Title: entry.Title,
 		Content: entry.Content,
 		HasPhoto: entry.HasPhoto,
-		TagId: entry.TagId,
+		TagId: &entry.TagId,
 	})
 
 	if err != nil {
@@ -234,7 +234,7 @@ func (e *EntryHandler) CreateChildEntry(c *fiber.Ctx) error {
 		Title: entry.Title,
 		Content: entry.Content,
 		ParentEntryId: entry.ParentEntryId,
-		TagId: entry.TagId,
+		TagId: &entry.TagId,
 	})
 
 	if err != nil {

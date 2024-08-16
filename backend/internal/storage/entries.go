@@ -19,7 +19,7 @@ type NewEntry struct {
 	Content    string `json:"content"`
 	Timestamp  time.Time
 	HasPhoto   bool `json:"has_photo"`
-	TagId int `json:"tag_id"`
+	TagId *int `json:"tag_id"`
 }
 
 type NewChildEntry struct {
@@ -28,7 +28,7 @@ type NewChildEntry struct {
 	Content    string `json:"content"`
 	ParentEntryId int `json:"parent_entry_id"`
 	Timestamp  time.Time
-	TagId int `json:"tag_id"`
+	TagId *int `json:"tag_id"`
 }
 
 type NewPhoto struct {
@@ -47,7 +47,7 @@ type Entry struct {
 	Content   string `json:"content"`
 	Timestamp time.Time `json:"timestamp"`
 	HasPhoto bool `json:"has_photo"`
-	TagId int `json:"tag_id"`
+	TagId *int `json:"tag_id"`
 }
 
 type Photo struct {
@@ -66,23 +66,33 @@ type ChildrenEntry struct {
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	Timestamp time.Time `json:"timestamp"`
-	TagId int `json:"tag_id"`
+	TagId *int `json:"tag_id"`
 }
 
 func (s *EntryStorage) CreateEntry(userId int, entry *NewEntry) (int, error) {
 	var entryId int
 
-	entry.Timestamp = time.Now()
+	if (entry.TagId == nil) {
+		err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content)
+		VALUES ($1, $2, $3, $4) RETURNING id`,
+		entry.NotebookID, userId, entry.Title, entry.Content).Scan(&entryId)
 
-	err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content, timestamp, tag_id)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		entry.NotebookID, userId, entry.Title, entry.Content, entry.Timestamp, entry.TagId).Scan(&entryId)
+		if err != nil {
+			return 0, err
+		}
 
-	if err != nil {
-		return 0, err
+		return entryId, nil
+	} else {
+		err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content, tag_id)
+			VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+			entry.NotebookID, userId, entry.Title, entry.Content, entry.TagId).Scan(&entryId)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return entryId, nil
 	}
-
-	return entryId, nil
 }
 
 func (s *EntryStorage) CreateChildEntry(userId int, entry *NewChildEntry) (int, error) {
@@ -90,14 +100,27 @@ func (s *EntryStorage) CreateChildEntry(userId int, entry *NewChildEntry) (int, 
 
 	entry.Timestamp = time.Now()
 
-	err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id)
-		VALUES ($1, $2, $3, $4, $5, $6)`,
-		entry.NotebookID, userId, entry.Title, entry.Content, entry.Timestamp, entry.TagId, entry.ParentEntryId).Scan(&entryId)
+	if (entry.TagId == nil) {
+		err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content, timestamp)
+			VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+			entry.NotebookID, userId, entry.Title, entry.Content, entry.Timestamp).Scan(&entryId)
 
-	if err != nil {
-		return 0, err
+		if err != nil {
+			return 0, err
+		}
+
+		return entryId, nil
+	} else {
+		err := s.Conn.QueryRow(`INSERT INTO entries (notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id)
+			VALUES ($1, $2, $3, $4, $5, $6)`,
+			entry.NotebookID, userId, entry.Title, entry.Content, entry.Timestamp, entry.TagId, entry.ParentEntryId).Scan(&entryId)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return entryId, nil
 	}
-	return entryId, nil
 }
 
 func (s *EntryStorage) GetEntriesForNotebook(userId int, notebookId int) ([]Entry, error) {
