@@ -10,6 +10,10 @@
 	export let data;
 
 	const { form, errors, enhance, constraints } = superForm(data.form);
+
+	function onCancel() {
+		window.location.href = '/';
+	}
 </script>
 
 <main
@@ -39,7 +43,11 @@
 				</div>
 			</Card.Content>
 			<Card.Footer class="grid grid-cols-3 gap-2">
-				<Button variant="secondary" class="flex items-center justify-center col-span-1 gap-2">
+				<Button
+					variant="secondary"
+					class="flex items-center justify-center col-span-1 gap-2"
+					onclick={onCancel}
+				>
 					<ArrowLeft class="w-4 h-4" />
 					Back
 				</Button>

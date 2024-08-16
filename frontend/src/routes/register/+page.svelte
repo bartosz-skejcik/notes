@@ -15,7 +15,7 @@
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
 	<form method="POST" use:enhance>
-		<Card.Root class="max-w-sm mx-auto border-none text-start">
+		<Card.Root class="max-w-sm mx-auto border-none shadow-none text-start">
 			<Card.Header>
 				<Card.Title class="text-xl">Sign Up</Card.Title>
 				<Card.Description>Enter your information to create an account</Card.Description>

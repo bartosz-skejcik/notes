@@ -42,7 +42,7 @@
 			bind:value={content}
 			name="content"
 			style="word-wrap: break-word; height: {textAreaHeight};"
-			class="w-3/4 px-0 overflow-hidden text-lg border-none resize-none focus-visible:ring-0 whitespace-break-spaces"
+			class="w-3/4 px-0 overflow-hidden text-lg border-none shadow-none resize-none focus-visible:ring-0 whitespace-break-spaces"
 			placeholder="What are you thinking?"
 			rows={1}
 		/>
@@ -64,7 +64,7 @@
 			</button>
 		</div>
 	{/if}
-	<div class="flex items-center justify-between w-full">
+	<div class="flex items-center justify-between w-full 2xl:justify-start 2xl:gap-4">
 		<Label for="image-upload" class="cursor-pointer">
 			<div class="p-2 rounded-lg hover:bg-muted text-foreground">
 				<Image class="w-5 h-5" />
@@ -79,6 +79,6 @@
 			onchange={(event: Event) =>
 				handleFileUpload(event, setFile, setImagePreview, imagePreview, setImagePreviewDims)}
 		/>
-		<Button type="submit" variant="default" class="w-fit">Post</Button>
+		<Button type="submit" variant="default" class="h-8 w-fit">Post</Button>
 	</div>
 </form>
