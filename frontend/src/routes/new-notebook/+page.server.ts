@@ -71,13 +71,25 @@ export const actions: Actions = {
 			);
 
 			if (res.status === 200) {
-				return redirect(302, '/welcome');
+				return redirect(302, '/');
 			} else {
 				throw new Error(`Unexpected response status: ${res.status}`);
 			}
 		} catch (error) {
-			console.error('Request failed:', error);
-			throw redirect(302, '/new-notebook');
+			// @ts-expect-error asd
+			if (error.response) {
+				// @ts-expect-error asd
+				console.error('Request failed with status code:', error.response.status);
+				// @ts-expect-error asd
+				console.error('Response body:', error.response.data);
+
+				// @ts-expect-error asd
+				throw redirect(301, `/new-notebook?error=${error.response.data.message}`);
+			} else {
+				// @ts-expect-error asd
+				console.error('Request error:', error.message);
+				throw redirect(301, '/');
+			}
 		}
 	}
 };
