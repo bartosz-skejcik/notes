@@ -38,6 +38,7 @@
 	"dependencies": {
 		"@ai-sdk/openai": "^0.0.46",
 		"@ai-sdk/svelte": "^0.0.36",
+		"@fontsource-variable/inter": "^5.0.20",
 		"ai": "^3.3.7",
 		"axios": "^1.7.4",
 		"bits-ui": "^0.21.13",

@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS entries (
     author_id INT REFERENCES users(id),
     tag_id INT REFERENCES tags(id),
     title VARCHAR NOT NULL,
-    content TEXT,
+    content TEXT DEFAULT '',
+    role VARCHAR NOT NULL DEFAULT 'user',
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     parent_entry_id INT REFERENCES entries(id),
     has_photo BOOLEAN DEFAULT FALSE

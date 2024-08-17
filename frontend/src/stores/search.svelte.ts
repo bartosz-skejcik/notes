@@ -1,15 +1,12 @@
-export function createSearch() {
-	let value = $state('');
+export const createSearch = () => {
+	let search = $state('');
 
 	return {
+		setValue(value: string) {
+			search = value;
+		},
 		get value() {
-			return value;
-		},
-		set value(v) {
-			value = v;
-		},
-		setValue(v: string) {
-			value = v;
+			return search;
 		}
 	};
-}
+};

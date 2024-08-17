@@ -47,6 +47,7 @@ type entryRequestBody struct {
 	NotebookId int
 	Title string `json:"title" validate:"required"`
 	Content string `json:"content"`
+	Role string `json:"role"`
 	HasPhoto bool `json:"has_photo"`
 	TagId int `json:"tag_id"`
 }
@@ -55,6 +56,7 @@ type childEntryRequestBody struct {
 	NotebookId int
 	Title string `json:"title" validate:"required"`
 	Content string `json:"content"`
+	Role string `json:"role"`
 	ParentEntryId int `json:"parent_entry_id" validate:"required"`
 	TagId int `json:"tag_id"`
 }
@@ -165,11 +167,12 @@ func (e *EntryHandler) CreateEntry(c *fiber.Ctx) error {
 	}
 
 	// create the entry
-	id, err := e.Storage.CreateEntry(user.Id, &storage.NewEntry{
+	newEntry, err := e.Storage.CreateEntry(user.Id, &storage.NewEntry{
 		NotebookID: notebookId,
 		Title: entry.Title,
 		Content: entry.Content,
 		HasPhoto: entry.HasPhoto,
+		Role: &entry.Role,
 		TagId: &entry.TagId,
 	})
 
@@ -178,10 +181,7 @@ func (e *EntryHandler) CreateEntry(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
 	}
 
-	resp := entrySuccessResponse{
-		Id: id,
-	}
-	return c.Status(fiber.StatusOK).JSON(resp)
+	return c.Status(fiber.StatusOK).JSON(newEntry)
 }
 
 // @Summary Create a child entry
@@ -193,7 +193,7 @@ func (e *EntryHandler) CreateEntry(c *fiber.Ctx) error {
 // @Success 200 {object} entrySuccessResponse
 // @Failure 400 {object} handlers.Response{Success: false, Message: string}
 // @Failure 500 {object} handlers.Response{Success: false, Message: string}
-// @Router /notebooks/{notebookId}/entries/child [post]
+// @Router /notebooks/{notebookId}/entries/{entryId}/children [post]
 func (e *EntryHandler) CreateChildEntry(c *fiber.Ctx) error {
 	// get the session from the authorization header
 	sessionHeader := c.Get("Authorization")
@@ -204,11 +204,18 @@ func (e *EntryHandler) CreateChildEntry(c *fiber.Ctx) error {
 	// get the user data from the session
 	user, err := e.SessionManager.GetSession(sessionId)
 	if err != nil {
-		return c.JSON(Response{Success: false, Message: "invalid session"})
+		fmt.Println("kutas")
+		return c.JSON(Response{Success: false, Message: "invalid session kutasie"})
 	}
 
 	// get the notebook id from the path
 	notebookId, err := strconv.Atoi(c.Params("notebookId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the entry id from the path
+	entryId, err := strconv.Atoi(c.Params("entryId"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
 	}
@@ -229,11 +236,12 @@ func (e *EntryHandler) CreateChildEntry(c *fiber.Ctx) error {
 	}
 
 	// create the entry
-	id, err := e.Storage.CreateChildEntry(user.Id, &storage.NewChildEntry{
+	newEntry, err := e.Storage.CreateChildEntry(user.Id, &storage.NewChildEntry{
 		NotebookID: notebookId,
 		Title: entry.Title,
 		Content: entry.Content,
-		ParentEntryId: entry.ParentEntryId,
+		Role: &entry.Role,
+		ParentEntryId: &entryId,
 		TagId: &entry.TagId,
 	})
 
@@ -242,10 +250,7 @@ func (e *EntryHandler) CreateChildEntry(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
 	}
 
-	resp := entrySuccessResponse{
-		Id: id,
-	}
-	return c.Status(fiber.StatusOK).JSON(resp)
+	return c.Status(fiber.StatusOK).JSON(newEntry)
 }
 
 // @Summary Get the children entreis for an entry

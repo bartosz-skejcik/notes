@@ -3,11 +3,7 @@ import { redirect, type Actions, type RequestEvent, type ServerLoadEvent } from 
 
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
-
-const schema = z.object({
-	name: z.string().min(3)
-});
+import { schema } from '$lib/schemas/new-notebook-schema';
 
 type UserSession = {
 	id: string;

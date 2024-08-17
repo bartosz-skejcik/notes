@@ -1,3 +1,5 @@
+// file: src/routes/notebooks/[slug]/+page.server.ts
+
 import api from '$lib/api';
 import { redirect, type ServerLoadEvent } from '@sveltejs/kit';
 
@@ -25,11 +27,16 @@ const getNotebook = async (sessionId: string, slug: string): Promise<Notebook> =
 export async function load(event: ServerLoadEvent) {
 	const sessionId = event.cookies.get('sessionId') as string;
 
+	if (!sessionId) {
+		throw redirect(302, '/login');
+	}
+
 	const slug = event.params.slug as string;
 
 	const notebook = await getNotebook(sessionId, slug);
 
 	return {
+		sessionId,
 		slug: event.params.slug,
 		notebook
 	};

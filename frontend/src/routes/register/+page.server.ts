@@ -8,15 +8,7 @@ import {
 } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
-
-// Define outside the load function so the adapter can be cached
-const schema = z.object({
-	firstName: z.string().min(3),
-	lastName: z.string().min(3),
-	email: z.string().email(),
-	password: z.string().min(6)
-});
+import { schema } from '$lib/schemas/register-schema';
 
 export async function load(event: ServerLoadEvent) {
 	const sessionId = event.cookies.get('sessionId');

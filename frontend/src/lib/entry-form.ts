@@ -7,15 +7,15 @@ export function autoResize() {
 }
 
 export function handleFileUpload(
-	event: Event,
-	setFile: (file: File | null) => void,
+	files: FileList | null,
+	setImage: (files: File) => void,
 	setImagePreview: (imagePrev: string | null) => void,
 	imagePreview: string | null,
 	setImagePreviewDims: (imagePrevDims: { width: number; height: number } | null) => void
 ) {
-	const inputFile = (event.target as HTMLInputElement).files?.[0];
+	const inputFile = files ? files[0] : undefined;
 	if (inputFile) {
-		setFile(inputFile);
+		setImage(inputFile);
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			setImagePreview(e.target?.result as string);
@@ -34,13 +34,13 @@ export function handleFileUpload(
 }
 
 export function deleteImage(
-	setFile: (file: File | null) => void,
+	setImage: (filef: File | undefined) => void,
 	setImagePreview: (imagePrev: string | null) => void
 ) {
-	setFile(null);
+	setImage(undefined);
 	setImagePreview(null);
 	// Reset the file input
-	const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+	const fileInput = document.getElementById('image_upload') as HTMLInputElement;
 	if (fileInput) {
 		fileInput.value = '';
 	}
