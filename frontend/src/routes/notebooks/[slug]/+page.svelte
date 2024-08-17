@@ -42,16 +42,19 @@
 	function convertEntriesToItems(entries: EntryType[]): {
 		label: string;
 		value: string;
+		id: number;
 	}[] {
 		const result: {
 			label: string;
 			value: string;
+			id: number;
 		}[] = [];
 
 		function processEntry(entry: EntryType) {
 			result.push({
 				label: entry.title,
-				value: entry.title
+				value: entry.title,
+				id: entry.id
 			});
 
 			// Process children recursively

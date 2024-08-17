@@ -7,6 +7,7 @@
 		items: {
 			label: string;
 			value: string;
+			id: number;
 		}[];
 	};
 	let { onChange, items }: Props = $props();
@@ -49,7 +50,7 @@
 	>
 		{#each list as item}
 			<a
-				href={`#${item.value}`}
+				href={`#${item.id}`}
 				onclick={() => {
 					search = '';
 				}}
