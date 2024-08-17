@@ -25,8 +25,6 @@ export const POST = (async ({ request }) => {
 			messages
 		});
 
-		console.log(result);
-
 		return result.toDataStreamResponse({ data });
 	} catch (error: unknown) {
 		console.error(error);

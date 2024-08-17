@@ -7,6 +7,7 @@ export type Entry = {
 	title: string;
 	content: string;
 	role: string;
+	parent_entry_id?: number;
 	timestamp: string;
 	has_photo: boolean;
 	tag_id: number | null;
@@ -76,7 +77,7 @@ export async function fetchEntries(params: { sessionId: string; slug: string }):
 		const entriesMap = new Map<number, Entry>();
 
 		// First pass: Create Entry objects and store them in the map
-		fetchedEntries.forEach((fe) => {
+		fetchedEntries?.forEach((fe) => {
 			entriesMap.set(fe.id, {
 				...fe,
 				children: []
@@ -85,7 +86,7 @@ export async function fetchEntries(params: { sessionId: string; slug: string }):
 
 		// Second pass: Organize entries into a tree structure
 		const rootEntries: Entry[] = [];
-		fetchedEntries.forEach((fe) => {
+		fetchedEntries?.forEach((fe) => {
 			const entry = entriesMap.get(fe.id)!;
 			if (fe.parent_entry_id === null) {
 				rootEntries.push(entry);
@@ -95,6 +96,10 @@ export async function fetchEntries(params: { sessionId: string; slug: string }):
 					parentEntry.children.push(entry);
 				}
 			}
+		});
+
+		rootEntries?.forEach((e) => {
+			e.children.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 		});
 
 		return rootEntries;
@@ -128,16 +133,24 @@ export async function addChildEntry(
 	entryId: number,
 	childEntry: NewChildEntry
 ): Promise<Entry | null> {
-	const res = await api.post(`/api/notebooks/${slug}/entries/${entryId}/children`, childEntry, {
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${sessionId}`
-		}
-	});
+	console.log(entryId, childEntry);
+	try {
+		const res = await api.post(`/api/notebooks/${slug}/entries/${entryId}/children`, childEntry, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${sessionId}`
+			}
+		});
 
-	if (res.status === 200) {
-		return res.data;
-	} else {
+		if (res.status === 200) {
+			return res.data;
+		} else {
+			console.log(res.data);
+			return null;
+		}
+	} catch (error) {
+		// @ts-expect-error asd
+		console.log(error.response.data);
 		return null;
 	}
 }

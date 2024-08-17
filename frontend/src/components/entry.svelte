@@ -3,19 +3,23 @@
 <script lang="ts">
 	import { addChildEntry, evalTimePassed, fetchChildEntries } from '$lib/entry';
 	import type { Entry } from '$lib/entry';
-	import { Check, FlipHorizontal2, Stars, X } from 'lucide-svelte';
+	import { Check, FlipHorizontal2, Plus, Stars, X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { Button } from '$ui/button';
 	import Needle from '$ui/icons/needle.svelte';
+	import EntryForm from './entry-form.svelte';
+	import type { Notebook } from '../routes/notebooks/[slug]/+page.server';
 
 	type Props = {
 		entries: Entry[];
 		entry: Entry;
 		slug: string | undefined;
 		sessionId: string;
+		notebook: Notebook;
 	};
 
 	let pendinAIResponseAccept = $state<boolean | null>(null);
+	let addChildEntryPending = $state<boolean | null>(false);
 
 	let { entries = $bindable(), entry, ...data }: Props = $props();
 
@@ -25,6 +29,7 @@
 			role: string;
 			content: string;
 			timestamp?: string;
+			parent_entry_id?: number;
 		}[]
 	>([]);
 
@@ -78,9 +83,10 @@
 		localEntries = [
 			...localEntries,
 			{
-				id: Math.floor(Math.random() * 10000),
+				id: entry.id + 1,
 				role: 'assistant',
-				content: ''
+				content: '',
+				parent_entry_id: entry.id
 			}
 		];
 
@@ -124,12 +130,14 @@
 		role: string;
 		content: string;
 		timestamp?: string;
+		parent_entry_id?: number;
 	}[] {
 		const result: {
 			id: number;
 			role: string;
 			content: string;
 			timestamp?: string;
+			parent_entry_id?: number;
 		}[] = [];
 
 		function processEntry(entry: Entry) {
@@ -137,7 +145,8 @@
 				id: entry.id,
 				role: entry.role,
 				content: entry.title,
-				timestamp: entry.timestamp
+				timestamp: entry.timestamp,
+				parent_entry_id: entry.parent_entry_id
 			});
 
 			// Process children recursively
@@ -151,9 +160,13 @@
 		return result;
 	}
 
-	onMount(async () => {
-		localEntries = convertEntriesToLocal(entry);
+	$effect(() => {
+		if (entry) {
+			localEntries = convertEntriesToLocal(entry);
+		}
 	});
+
+	$inspect(localEntries);
 </script>
 
 <div class="flex flex-col items-start justify-center w-full group">
@@ -167,20 +180,58 @@
 						<Stars class="w-3/5 h-3/5 text-white/40 text-muted-foreground" />
 					{/if}
 				</button>
-				{#if i !== localEntries.length - 1}
+				{#if i !== localEntries.length - 1 || addChildEntryPending === true}
 					<div
-						class="w-[4px] rounded-full flex-1 min-h-5 dark:bg-muted/80 bg-muted-foreground/20"
+						class={`w-[4px] ${addChildEntryPending == true ? 'rounded-t-full' : 'rounded-full'} flex-1 min-h-5 dark:bg-muted/80 bg-muted-foreground/20`}
 					></div>
 				{/if}
 			</div>
 			<div id={e.id.toString()} class="flex-1">
-				<p class="pr-2 text-lg">{e.content}</p>
+				<p class="pr-2 text-lg">
+					{e.content}
+				</p>
+				{#if e.role === 'assistant' && localEntries.indexOf(e) !== localEntries.length - 1}
+					<br />
+				{/if}
+
+				<!-- hover options -->
+				<div
+					class={`${pendinAIResponseAccept !== null || (localEntries.length > 1 && i !== localEntries.length - 1) ? 'hidden' : 'flex'} ${addChildEntryPending == true ? '' : 'transition-all duration-200 opacity-0 group-hover:opacity-100 delay-200'} items-center w-full gap-2 mt-2`}
+				>
+					<Button
+						variant="brand_ghost"
+						size="sm"
+						class="px-3"
+						onclick={() => (addChildEntryPending = !addChildEntryPending)}
+					>
+						<Needle class="w-6 h-6 mr-2 text-brand" />
+						Add another entry
+					</Button>
+					{#if !pendinAIResponseAccept}
+						<p class="font-extrabold text-center text-muted-foreground/20">/</p>
+						<Button
+							variant="brand_ghost"
+							size="sm"
+							class="px-3"
+							onclick={() => {
+								if (addChildEntryPending === true) {
+									addChildEntryPending = false;
+								}
+								streamResponse();
+							}}
+						>
+							<FlipHorizontal2 class="w-5 h-5 mr-2" />
+							Reflect
+						</Button>
+					{/if}
+				</div>
 			</div>
 			<p class="text-sm text-muted-foreground">
 				{e.timestamp && evalTimePassed(e.timestamp)}
 			</p>
 		</div>
 	{/each}
+
 	<!-- accept / deny AI response -->
 	{#if pendinAIResponseAccept === true}
 		<div class="flex items-center justify-end w-full gap-2 pl-10 mt-3">
@@ -194,20 +245,29 @@
 			</Button>
 		</div>
 	{/if}
-	<!-- hover options -->
-	<div
-		class={`${pendinAIResponseAccept !== null ? 'hidden' : 'flex'}  items-center w-full gap-2 pl-10 mt-2 transition-all duration-200 opacity-0 group-hover:opacity-100 delay-200`}
-	>
-		<Button variant="brand_ghost" size="sm" class="px-3">
-			<Needle class="w-6 h-6 mr-2 text-brand" />
-			Add another entry
-		</Button>
-		{#if !pendinAIResponseAccept}
-			<p class="font-extrabold text-center text-muted-foreground/20">/</p>
-			<Button variant="brand_ghost" size="sm" class="px-3" onclick={streamResponse}>
-				<FlipHorizontal2 class="w-5 h-5 mr-2" />
-				Reflect
-			</Button>
-		{/if}
-	</div>
+
+	<!-- add another entry -->
+	{#if addChildEntryPending === true}
+		<div class={`flex items-start w-full gap-2`}>
+			<div class="flex flex-col items-center justify-start w-10 gap-2 pb-2">
+				<div
+					class="w-[4px] rounded-b-full flex-1 min-h-5 dark:bg-muted/80 bg-muted-foreground/20"
+				></div>
+				<button
+					class="flex items-center justify-center rounded-full w-7 h-7 dark:bg-muted bg-muted-foreground/50 aspect-square"
+				>
+				</button>
+			</div>
+			<div class="flex-1 pt-3 -ml-3">
+				<EntryForm
+					{...data}
+					bind:entries
+					childEntry={true}
+					parentEntry={entry}
+					bind:localEntries
+					onClose={() => (addChildEntryPending = false)}
+				/>
+			</div>
+		</div>
+	{/if}
 </div>

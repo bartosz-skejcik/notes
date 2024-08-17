@@ -57,7 +57,7 @@ type childEntryRequestBody struct {
 	Title string `json:"title" validate:"required"`
 	Content string `json:"content"`
 	Role string `json:"role"`
-	ParentEntryId int `json:"parent_entry_id" validate:"required"`
+	ParentEntryId int `json:"parent_entry_id"`
 	TagId int `json:"tag_id"`
 }
 
@@ -66,9 +66,9 @@ type photoRequestBody struct {
 	MimeType string `json:"mime_type" validate:"required"`
 }
 
-type entrySuccessResponse struct {
-	Id int `json:"id"`
-}
+// type entrySuccessResponse struct {
+// 	Id int `json:"id"`
+// }
 
 type photoSuccessResponse struct {
 	Id int `json:"id"`

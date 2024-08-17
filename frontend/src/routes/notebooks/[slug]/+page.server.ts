@@ -3,7 +3,7 @@
 import api from '$lib/api';
 import { redirect, type ServerLoadEvent } from '@sveltejs/kit';
 
-type Notebook = {
+export type Notebook = {
 	id: string;
 	user_id: string;
 	name: string;
