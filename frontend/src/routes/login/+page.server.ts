@@ -48,7 +48,7 @@ export const actions: Actions = {
 				const sessionId = header?.split(' ')[1];
 
 				event.cookies.set('sessionId', sessionId, { path: '/' });
-				throw redirect(301, '/');
+				return redirect(302, '/');
 			} else {
 				throw new Error(`Unexpected response status: ${res.status}`);
 			}
@@ -63,9 +63,7 @@ export const actions: Actions = {
 				// @ts-expect-error asd
 				throw redirect(301, `/login?error=${error.response.data.message}`);
 			} else {
-				// @ts-expect-error asd
-				console.error('Request error:', error.message);
-				throw redirect(301, '/');
+				return redirect(301, '/');
 			}
 		}
 	}
