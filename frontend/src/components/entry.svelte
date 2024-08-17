@@ -1,10 +1,9 @@
 <!-- file: src/components/entry.svelte -->
 
 <script lang="ts">
-	import { addChildEntry, evalTimePassed, fetchChildEntries } from '$lib/entry';
+	import { addChildEntry, evalTimePassed } from '$lib/entry';
 	import type { Entry } from '$lib/entry';
-	import { Check, FlipHorizontal2, Plus, Stars, X } from 'lucide-svelte';
-	import { onMount } from 'svelte';
+	import { Check, FlipHorizontal2, Stars, X } from 'lucide-svelte';
 	import { Button } from '$ui/button';
 	import Needle from '$ui/icons/needle.svelte';
 	import EntryForm from './entry-form.svelte';
@@ -172,12 +171,12 @@
 <div class="flex flex-col items-start justify-center w-full group">
 	{#each localEntries as e, i}
 		<div class={`flex w-full pt-2`}>
-			<div class="flex flex-col items-center w-10 gap-2">
+			<div class="flex flex-col items-center w-10 gap-2 pt-0.5 pr-1">
 				<button
-					class="flex items-center justify-center rounded-full w-7 h-7 dark:bg-muted bg-muted-foreground/50 aspect-square"
+					class="flex items-center justify-center w-6 h-6 rounded-full bg-muted-foreground/20 aspect-square"
 				>
 					{#if e.role === 'assistant'}
-						<Stars class="w-3/5 h-3/5 text-white/40 text-muted-foreground" />
+						<Stars class="w-4/5 h-4/5 text-muted-foreground/40" />
 					{/if}
 				</button>
 				{#if i !== localEntries.length - 1 || addChildEntryPending === true}
@@ -249,12 +248,12 @@
 	<!-- add another entry -->
 	{#if addChildEntryPending === true}
 		<div class={`flex items-start w-full gap-2`}>
-			<div class="flex flex-col items-center justify-start w-10 gap-2 pb-2">
+			<div class="flex flex-col items-center justify-start w-10 gap-2 pb-2 pr-1">
 				<div
 					class="w-[4px] rounded-b-full flex-1 min-h-5 dark:bg-muted/80 bg-muted-foreground/20"
 				></div>
 				<button
-					class="flex items-center justify-center rounded-full w-7 h-7 dark:bg-muted bg-muted-foreground/50 aspect-square"
+					class="flex items-center justify-center w-6 h-6 rounded-full dark:bg-muted bg-muted-foreground/50 aspect-square"
 				>
 				</button>
 			</div>

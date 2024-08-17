@@ -46,7 +46,7 @@
 	<div
 		style={`top: calc(-1 * ${resultDiv?.offsetHeight}); width: ${rootDiv?.offsetWidth}px`}
 		bind:this={resultDiv}
-		class={`flex flex-col bg-background/100 px-1 border border-border rounded-b-lg absolute z-20 py-2 -ml-[1px] w-full gap-1 ${search ? '' : 'hidden'}`}
+		class={`flex flex-col bg-muted px-1 border border-border rounded-b-lg absolute z-20 py-2 -ml-[1px] w-full gap-1 ${search ? '' : 'hidden'}`}
 	>
 		{#each list as item}
 			<a
