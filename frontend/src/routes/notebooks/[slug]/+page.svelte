@@ -70,7 +70,7 @@
 </script>
 
 <nav class="sticky top-0 flex items-center justify-between px-3 py-2 z-4 bg-background">
-	<div class="flex items-center gap-2 text-[0.97rem] text-muted-foreground/80">
+	<div class="flex items-center gap-2 text-[0.97rem] text-muted-foreground">
 		<p>{data.notebook.name}</p>
 		<span>•</span>
 		<p>
@@ -86,8 +86,8 @@
 		<CommandSearch items={convertEntriesToItems(entries)} onChange={search.setValue} />
 		<div class="flex items-center justify-center gap-3">
 			<ThemeSwitcher />
-			<Button size="icon" variant="ghost" class="w-8 h-8">
-				<Settings class="w-5 h-5 text-muted-foreground" />
+			<Button size="icon" variant="ghost" class={'relative text-muted-foreground w-8 h-8'}>
+				<Settings class="w-5 h-5" />
 			</Button>
 			<Button
 				onclick={() => (window.location.href = '/')}

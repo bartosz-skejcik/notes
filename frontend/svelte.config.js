@@ -17,7 +17,8 @@ const config = {
 			$ui: './src/components/ui',
 			$lib: './src/lib',
 			$stores: './src/stores',
-			$views: './src/components/views'
+			$views: './src/components/views',
+			$themes: './src/themes'
 		}
 	}
 };

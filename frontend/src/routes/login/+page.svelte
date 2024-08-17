@@ -15,7 +15,7 @@
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
 	<form method="POST" use:enhance>
-		<Card.Root class="w-full max-w-sm border-none shadow-none text-start">
+		<Card.Root class="w-full max-w-sm bg-transparent border-none shadow-none text-start">
 			<Card.Header>
 				<Card.Title class="text-2xl">Login</Card.Title>
 				<Card.Description>Enter your email below to login to your account.</Card.Description>

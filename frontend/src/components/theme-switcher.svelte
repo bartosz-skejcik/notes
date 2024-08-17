@@ -1,16 +1,33 @@
 <script lang="ts">
-	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$ui/button';
 
-	import { Sun, Moon } from 'lucide-svelte/icons';
+	import { Sun, Moon, StickyNote } from 'lucide-svelte/icons';
+	import { theme, setTheme } from '$stores/theme';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		setTheme($theme);
+	});
+
+	function cycleTheme(): void {
+		const themes = ['base', 'dark', 'paper'];
+		const currentIndex = themes.indexOf($theme);
+		const nextIndex = (currentIndex + 1) % themes.length;
+		setTheme(themes[nextIndex]);
+	}
 </script>
 
-<Button onclick={toggleMode} size="icon" variant="ghost" class={'relative text-muted-foreground'}>
-	<Sun
-		class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75 dark:-rotate-90 dark:scale-0"
-	/>
-	<Moon
-		class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-75 dark:rotate-0 dark:scale-100"
-	/>
+<Button onclick={cycleTheme} size="icon" variant="ghost" class={'relative text-muted-foreground'}>
+	{#if $theme === 'base'}
+		<Sun class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75" />
+	{/if}
+	{#if $theme === 'dark'}
+		<Moon class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-75" />
+	{/if}
+	{#if $theme === 'paper'}
+		<StickyNote
+			class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75"
+		/>
+	{/if}
 	<span class="sr-only">Toggle theme</span>
 </Button>

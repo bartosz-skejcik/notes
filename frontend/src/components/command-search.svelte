@@ -33,7 +33,7 @@
 
 <div
 	bind:this={rootDiv}
-	class={`relative focus-within:w-full ease-in-out transition-all duration-200 w-1/3 border border-border ${search !== '' ? 'rounded-t-lg' : 'rounded-lg '}`}
+	class={`relative focus-within:w-full ease-in-out transition-all duration-200 w-1/3 border border-border bg-muted ${search !== '' ? 'rounded-t-lg' : 'rounded-lg '}`}
 >
 	<div class="flex items-center justify-center gap-2 px-3">
 		<Search class="w-4 h-4 text-muted-foreground" />

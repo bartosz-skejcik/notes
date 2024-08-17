@@ -21,11 +21,7 @@
 		<NotebookText strokeWidth={1.4} class="p-4 text-foreground bg-muted rounded-xl w-28 h-28" />
 		<h1 class="text-3xl xl:text-4xl">{session?.display_name.split(' ')[0]}{"'"}s Notes</h1>
 	</div>
-	<Button
-		class="flex items-center justify-center gap-2 text-white bg-brand hover:bg-brand/90"
-		variant="default"
-		on:click={handleClick}
-	>
+	<Button class="flex items-center justify-center gap-2" variant="default" on:click={handleClick}>
 		<span>Create a new notebook</span>
 		<ArrowRight class="w-4 h-4" />
 	</Button>
@@ -39,13 +35,13 @@
 					<div class="flex items-center justify-between w-full gap-2 px-4 py-2 rounded-md">
 						<span>{notebook.name}</span>
 						<div class="flex items-center gap-2">
-							<Button variant="ghost" class="px-3 hover:text-red-500">
+							<Button variant="red_ghost" class="px-3">
 								<Trash class="w-4 h-4" />
 							</Button>
 							<Button
 								on:click={() => navigate(`/notebooks/${notebook.id}`)}
-								class="text-white bg-brand hover:bg-brand/90"
-								variant="default">Open</Button
+								variant="ghost"
+								class="underline">Open</Button
 							>
 						</div>
 					</div>
