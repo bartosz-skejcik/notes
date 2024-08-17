@@ -21,6 +21,7 @@
 
 	let localEntries = $state<
 		{
+			id: number;
 			role: string;
 			content: string;
 			timestamp?: string;
@@ -77,6 +78,7 @@
 		localEntries = [
 			...localEntries,
 			{
+				id: Math.floor(Math.random() * 10000),
 				role: 'assistant',
 				content: ''
 			}
@@ -118,11 +120,13 @@
 	}
 
 	function convertEntriesToLocal(e: Entry): {
+		id: number;
 		role: string;
 		content: string;
 		timestamp?: string;
 	}[] {
 		const result: {
+			id: number;
 			role: string;
 			content: string;
 			timestamp?: string;
@@ -130,6 +134,7 @@
 
 		function processEntry(entry: Entry) {
 			result.push({
+				id: entry.id,
 				role: entry.role,
 				content: entry.title,
 				timestamp: entry.timestamp
@@ -154,21 +159,21 @@
 <div class="flex flex-col items-start justify-center w-full group">
 	{#each localEntries as e, i}
 		<div class={`flex w-full pt-2`}>
-			<div class="flex flex-col items-center justify-center w-10 h-full gap-2">
+			<div class="flex flex-col items-center w-10 gap-2">
 				<button
-					class="grid rounded-full w-7 h-7 dakr:bg-muted bg-muted-foreground/50 place-items-center"
+					class="flex items-center justify-center rounded-full w-7 h-7 dark:bg-muted bg-muted-foreground/50 aspect-square"
 				>
 					{#if e.role === 'assistant'}
-						<Stars class="w-3/5 h-3/5 text-white/40" />
+						<Stars class="w-3/5 h-3/5 text-white/40 text-muted-foreground" />
 					{/if}
 				</button>
 				{#if i !== localEntries.length - 1}
 					<div
-						class="w-[4px] rounded-full h-full min-h-5 dark:bg-muted/80 bg-muted-foreground/20"
+						class="w-[4px] rounded-full flex-1 min-h-5 dark:bg-muted/80 bg-muted-foreground/20"
 					></div>
 				{/if}
 			</div>
-			<div id={e.content} class="flex-1">
+			<div id={e.id.toString()} class="flex-1">
 				<p class="pr-2 text-lg">{e.content}</p>
 			</div>
 			<p class="text-sm text-muted-foreground">
