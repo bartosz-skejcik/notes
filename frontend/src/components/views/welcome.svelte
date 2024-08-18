@@ -18,7 +18,10 @@
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
 	<div class="flex flex-col items-center space-y-4 text-foreground">
-		<NotebookText strokeWidth={1.4} class="p-4 text-foreground bg-muted rounded-xl w-28 h-28" />
+		<!-- <NotebookText strokeWidth={1.4} class="p-4 text-foreground bg-muted rounded-xl w-28 h-28" /> -->
+
+		<img src="/logo.png" alt="logo" class="w-36 h-36" />
+
 		<h1 class="text-3xl xl:text-4xl">{session?.display_name.split(' ')[0]}{"'"}s Notes</h1>
 	</div>
 	<Button class="flex items-center justify-center gap-2" variant="default" on:click={handleClick}>
