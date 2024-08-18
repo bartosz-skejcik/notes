@@ -22,7 +22,7 @@
 		<Sun class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75" />
 	{/if}
 	{#if $theme === 'dark'}
-		<Moon class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-75" />
+		<Moon class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75" />
 	{/if}
 	{#if $theme === 'paper'}
 		<StickyNote

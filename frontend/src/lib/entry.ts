@@ -7,11 +7,20 @@ export type Entry = {
 	title: string;
 	content: string;
 	role: string;
-	parent_entry_id?: number;
+	parent_entry_id?: number | null;
 	timestamp: string;
 	has_photo: boolean;
 	tag_id: number | null;
 	children: Entry[];
+};
+
+export type LocalEntryType = {
+	id: number;
+	role: string;
+	content: string;
+	timestamp?: string;
+	parent_entry_id?: number | null;
+	tag_id: number | null;
 };
 
 type FetchedEntry = {
@@ -77,32 +86,37 @@ export async function fetchEntries(params: { sessionId: string; slug: string }):
 		const entriesMap = new Map<number, Entry>();
 
 		// First pass: Create Entry objects and store them in the map
-		fetchedEntries?.forEach((fe) => {
-			entriesMap.set(fe.id, {
-				...fe,
-				children: []
-			} as Entry);
-		});
 
-		// Second pass: Organize entries into a tree structure
-		const rootEntries: Entry[] = [];
-		fetchedEntries?.forEach((fe) => {
-			const entry = entriesMap.get(fe.id)!;
-			if (fe.parent_entry_id === null) {
-				rootEntries.push(entry);
-			} else {
-				const parentEntry = entriesMap.get(fe.parent_entry_id);
-				if (parentEntry) {
-					parentEntry.children.push(entry);
+		if (fetchedEntries && fetchedEntries.length > 0) {
+			fetchedEntries?.forEach((fe) => {
+				entriesMap.set(fe.id, {
+					...fe,
+					children: []
+				} as Entry);
+			});
+
+			// Second pass: Organize entries into a tree structure
+			const rootEntries: Entry[] = [];
+			fetchedEntries?.forEach((fe) => {
+				const entry = entriesMap.get(fe.id)!;
+				if (fe.parent_entry_id === null) {
+					rootEntries.push(entry);
+				} else {
+					const parentEntry = entriesMap.get(fe.parent_entry_id);
+					if (parentEntry) {
+						parentEntry.children.push(entry);
+					}
 				}
-			}
-		});
+			});
 
-		rootEntries?.forEach((e) => {
-			e.children.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-		});
+			rootEntries?.forEach((e) => {
+				e.children.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+			});
 
-		return rootEntries;
+			return rootEntries;
+		} else {
+			return [];
+		}
 	} else {
 		return [];
 	}
@@ -170,6 +184,67 @@ export async function fetchChildEntries(
 	if (res.status === 200) {
 		return res.data;
 	} else {
+		return null;
+	}
+}
+
+export async function updateChildEntry(
+	sessionId: string,
+	slug: string,
+	entryId: number,
+	childEntryId: number,
+	childEntry: NewChildEntry
+): Promise<Entry | null> {
+	console.log(entryId, childEntry);
+	try {
+		const res = await api.patch(
+			`/api/notebooks/${slug}/entries/${entryId}/children/${childEntryId}`,
+			childEntry,
+			{
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${sessionId}`
+				}
+			}
+		);
+
+		if (res.status === 200) {
+			return res.data;
+		} else {
+			console.log(res.data);
+			return null;
+		}
+	} catch (error) {
+		// @ts-expect-error asd
+		console.log(error.response.data);
+		return null;
+	}
+}
+
+export async function updateEntry(
+	sessionId: string,
+	slug: string,
+	entryId: number,
+	entry: NewEntry
+): Promise<Entry | null> {
+	console.log(entryId, entry);
+	try {
+		const res = await api.patch(`/api/notebooks/${slug}/entries/${entryId}`, entry, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${sessionId}`
+			}
+		});
+
+		if (res.status === 200) {
+			return res.data;
+		} else {
+			console.log(res.data);
+			return null;
+		}
+	} catch (error) {
+		// @ts-expect-error asd
+		console.log(error.response.data);
 		return null;
 	}
 }

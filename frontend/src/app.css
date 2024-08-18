@@ -5,6 +5,9 @@
 @layer base {
 	:root {
 		--radius: 0.5rem;
+		--orange: 255, 149, 0;
+		--green: 16, 185, 129;
+		--blue: 0, 160, 255;
 	}
 }
 
@@ -15,5 +18,25 @@
 	}
 	body {
 		@apply bg-background/100 text-foreground;
+	}
+}
+
+/* style the scrollbar */
+@layer utilities {
+	::-webkit-scrollbar {
+		width: 0.5rem;
+		height: 0.5rem;
+	}
+
+	::-webkit-scrollbar-track {
+		@apply bg-background/50;
+	}
+
+	::-webkit-scrollbar-thumb {
+		@apply bg-foreground/20 rounded-2xl;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		@apply bg-foreground/30;
 	}
 }

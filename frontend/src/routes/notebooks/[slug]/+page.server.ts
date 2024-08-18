@@ -1,6 +1,7 @@
 // file: src/routes/notebooks/[slug]/+page.server.ts
 
 import api from '$lib/api';
+import { fetchTags } from '$lib/tags';
 import { redirect, type ServerLoadEvent } from '@sveltejs/kit';
 
 export type Notebook = {
@@ -35,9 +36,12 @@ export async function load(event: ServerLoadEvent) {
 
 	const notebook = await getNotebook(sessionId, slug);
 
+	const tags = await fetchTags(sessionId);
+
 	return {
 		sessionId,
 		slug: event.params.slug,
-		notebook
+		notebook,
+		tags
 	};
 }

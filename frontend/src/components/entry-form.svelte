@@ -7,28 +7,22 @@
 	import { Textarea } from '$ui/textarea';
 	import { autoResize, deleteImage, handleFileUpload } from '$lib/entry-form';
 	import type { PageData } from '../routes/notebooks/[slug]/$types';
-	import { addChildEntry, addEntry, type Entry } from '$lib/entry';
+	import { addChildEntry, addEntry, type Entry, type LocalEntryType } from '$lib/entry';
 
 	interface Props extends PageData {
 		childEntry?: boolean;
 		onClose?: () => void;
 		entries: Entry[];
-		parentEntry?: Entry;
-		localEntries?: {
-			id: number;
-			role: string;
-			content: string;
-			timestamp?: string;
-			parent_entry_id?: number;
-		}[];
+		entry?: Entry;
+		localEntries?: LocalEntryType[];
 	}
 
 	let {
-		parentEntry,
 		childEntry,
 		onClose,
 		entries = $bindable(),
-		localEntries = $bindable(),
+		localEntries,
+		entry = $bindable(),
 		...data
 	}: Props = $props();
 
@@ -78,14 +72,14 @@
 
 			if (!data.slug || typeof data.slug == undefined) return;
 
-			if (childEntry && parentEntry && parentEntry.id) {
-				const newEntry = await addChildEntry(data.sessionId, data.slug, parentEntry.id, {
+			if (childEntry && entry && entry.id) {
+				const newEntry = await addChildEntry(data.sessionId, data.slug, entry.id, {
 					title: title,
 					role: 'user',
-					tag_id: parentEntry.tag_id ?? null
+					tag_id: entry.tag_id ?? null
 				});
 
-				console.log(newEntry);
+				// console.log(newEntry);
 
 				// {
 				// 	id: 20,
@@ -101,12 +95,26 @@
 
 				if (newEntry !== null) {
 					// entries.unshift(newEntry);
-					localEntries?.push({
+					// localEntries?.push({
+					// 	id: newEntry.id,
+					// 	role: newEntry.role,
+					// 	content: newEntry.title,
+					// 	timestamp: newEntry.timestamp,
+					// 	parent_entry_id: newEntry.parent_entry_id,
+					// 	tag_id: newEntry.tag_id
+					// });
+					entry.children.push({
+						notebook_id: entry.notebook_id,
 						id: newEntry.id,
 						role: newEntry.role,
-						content: newEntry.title,
+						author_id: entry.author_id,
+						title: newEntry.title,
+						content: newEntry.content,
 						timestamp: newEntry.timestamp,
-						parent_entry_id: newEntry.parent_entry_id
+						has_photo: false,
+						children: [],
+						parent_entry_id: newEntry.parent_entry_id,
+						tag_id: newEntry.tag_id
 					});
 				}
 			} else {
@@ -123,6 +131,7 @@
 
 			title = '';
 			setFile(undefined);
+			onClose && onClose();
 			setImagePreview(null);
 			setImagePreviewDims(null);
 		};

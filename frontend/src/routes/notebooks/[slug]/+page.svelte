@@ -7,12 +7,15 @@
 	import ThemeSwitcher from '$components/theme-switcher.svelte';
 	import { Button } from '$ui/button';
 
+	import { flip } from 'svelte/animate';
+
 	import { Settings, Home } from 'lucide-svelte';
 	import { fetchEntries } from '$lib/entry';
 	import type { PageData } from './$types';
 	import type { Entry as EntryType } from '$lib/entry';
 	import Entry from '$components/entry.svelte';
 	import EntryForm from '$components/entry-form.svelte';
+	import { quintOut } from 'svelte/easing';
 
 	let { data }: { data: PageData } = $props();
 
@@ -102,7 +105,9 @@
 </nav>
 <div class="p-3 pb-20 space-y-1">
 	<EntryForm {...data} bind:entries />
-	{#each entries as entry, i (entry.id)}
-		<Entry bind:entries {entry} {...data} />
+	{#each entries as entry, i (i)}
+		<div animate:flip={{ duration: 300, easing: quintOut }} class="w-full">
+			<Entry bind:entries {entry} {...data} tags={data.tags} />
+		</div>
 	{/each}
 </div>

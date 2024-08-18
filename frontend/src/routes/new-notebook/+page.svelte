@@ -20,7 +20,7 @@
 	class="flex flex-col items-center justify-center flex-1 w-full h-screen px-20 text-center gap-y-12"
 >
 	<form method="POST" use:enhance>
-		<Card.Root class="w-full max-w-sm border-none text-start">
+		<Card.Root class="w-full max-w-sm bg-transparent border-none shadow-none text-start">
 			<Card.Header class="w-full">
 				<Card.Title class="w-full text-2xl text-start">Create a new notebook</Card.Title>
 			</Card.Header>
