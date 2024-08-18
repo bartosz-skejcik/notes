@@ -15,7 +15,8 @@ const buttonVariants = tv({
 			link: 'text-primary underline-offset-4 hover:underline',
 			brand_solid: 'bg-brand text-white hover:bg-brand/90 shadow-sm',
 			brand_ghost: 'hover:bg-brand/30 text-brand',
-			red_ghost: 'hover:bg-red-500/30 text-red-500'
+			red_ghost: 'hover:bg-red-500/30 text-red-500',
+			custom_ghost: ''
 		},
 		size: {
 			default: 'h-9 px-4 py-2',

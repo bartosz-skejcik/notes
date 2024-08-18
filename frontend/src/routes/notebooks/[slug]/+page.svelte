@@ -11,11 +11,20 @@
 
 	import { Settings, Home } from 'lucide-svelte';
 	import { fetchEntries } from '$lib/entry';
-	import type { PageData } from './$types';
 	import type { Entry as EntryType } from '$lib/entry';
 	import Entry from '$components/entry.svelte';
 	import EntryForm from '$components/entry-form.svelte';
 	import { quintOut } from 'svelte/easing';
+	import Encuragement from '$components/encuragement.svelte';
+	import type { Notebook } from './+page.server';
+	import type { Tag } from '$lib/tags';
+
+	type PageData = {
+		sessionId: string;
+		slug: string;
+		notebook: Notebook;
+		tags: Tag[];
+	};
 
 	let { data }: { data: PageData } = $props();
 
@@ -110,4 +119,7 @@
 			<Entry bind:entries {entry} {...data} tags={data.tags} />
 		</div>
 	{/each}
+	{#if entries.length === 0}
+		<Encuragement />
+	{/if}
 </div>

@@ -89,11 +89,11 @@
 			<Stars
 				class={`w-4/5 h-4/5 text-muted-foreground/40 ${
 					selectedTag?.value === 'do-later'
-						? `text-green-800`
+						? `text-green-600`
 						: selectedTag?.value === 'highlight'
-							? `text-orange-800`
+							? `text-orange-600`
 							: selectedTag?.value === 'new-idea'
-								? `text-blue-800`
+								? `text-blue-600`
 								: `text-muted-foreground/40`
 				}`}
 			/>
@@ -115,7 +115,7 @@
 		{/if}
 	</div>
 	<div id={e.id.toString()} class="flex-1">
-		<p class="pr-2 text-lg">
+		<p class={`pr-2 ${e.role === 'assistant' ? 'text-[0.98rem] text-foreground/80' : 'text-lg'}`}>
 			{e.content}
 		</p>
 		{#if e.role === 'assistant' && localEntries.indexOf(e) !== localEntries.length - 1}
@@ -126,31 +126,33 @@
 		<div
 			class={`${pendingAIResponseAccept !== null || (localEntries.length > 1 && i !== localEntries.length - 1) ? 'hidden' : 'flex'} ${addChildEntryPending == true ? '' : 'transition-all duration-200 opacity-0 group-hover:opacity-100 delay-200'} items-center w-full gap-2 mt-2`}
 		>
-			<Button
-				variant="brand_ghost"
-				size="sm"
-				class="px-3"
-				onclick={() => (addChildEntryPending = !addChildEntryPending)}
-			>
-				<Needle class="w-6 h-6 mr-2 text-brand" />
-				Add another entry
-			</Button>
-			{#if !pendingAIResponseAccept}
-				<p class="font-extrabold text-center text-muted-foreground/20">/</p>
+			{#if selectedTag}
 				<Button
-					variant="brand_ghost"
+					variant="ghost"
 					size="sm"
-					class="px-3"
-					onclick={() => {
-						if (addChildEntryPending === true) {
-							addChildEntryPending = false;
-						}
-						streamResponse();
-					}}
+					onclick={() => (addChildEntryPending = !addChildEntryPending)}
+					class={`px-3 ${selectedTag.value == 'do-later' ? 'text-green-600 hover:bg-green-500/30 hover:text-green-600' : ''} ${selectedTag.value == 'highlight' ? 'text-orange-500 hover:bg-orange-500/30 hover:text-orange-500' : ''} ${selectedTag.value == 'new-idea' ? 'hover:bg-brand/30 text-brand hover:text-blue-600' : ''} ${selectedTag.value == 'none' ? 'text-muted-foreground' : ''}`}
 				>
-					<FlipHorizontal2 class="w-5 h-5 mr-2" />
-					Reflect
+					<Needle class="w-6 h-6 mr-2" />
+					Add another entry
 				</Button>
+				{#if !pendingAIResponseAccept}
+					<p class="font-extrabold text-center text-muted-foreground/20">/</p>
+					<Button
+						variant="ghost"
+						size="sm"
+						class={`px-3 ${selectedTag.value == 'do-later' ? 'text-green-600 hover:bg-green-500/30 hover:text-green-600' : ''} ${selectedTag.value == 'highlight' ? 'text-orange-500 hover:bg-orange-500/30 hover:text-orange-500' : ''} ${selectedTag.value == 'new-idea' ? 'hover:bg-brand/30 text-brand hover:text-blue-600' : ''} ${selectedTag.value == 'none' ? 'text-muted-foreground' : ''}`}
+						onclick={() => {
+							if (addChildEntryPending === true) {
+								addChildEntryPending = false;
+							}
+							streamResponse();
+						}}
+					>
+						<FlipHorizontal2 class="w-5 h-5 mr-2" />
+						Reflect
+					</Button>
+				{/if}
 			{/if}
 		</div>
 	</div>

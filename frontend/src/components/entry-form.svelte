@@ -73,25 +73,12 @@
 			if (!data.slug || typeof data.slug == undefined) return;
 
 			if (childEntry && entry && entry.id) {
+				console.log('adding child entry', childEntry, entry);
 				const newEntry = await addChildEntry(data.sessionId, data.slug, entry.id, {
 					title: title,
 					role: 'user',
 					tag_id: entry.tag_id ?? null
 				});
-
-				// console.log(newEntry);
-
-				// {
-				// 	id: 20,
-				// 	notebook_id: 1,
-				// 	author_id: 1,
-				// 	title: 'this is a test string to see if the child entry adding works',
-				// 	content: '',
-				// 	role: 'user',
-				// 	timestamp: '2024-08-17T11:42:17.254088Z',
-				// 	parent_entry_id: 18,
-				// 	tag_id: null
-				// }
 
 				if (newEntry !== null) {
 					// entries.unshift(newEntry);
