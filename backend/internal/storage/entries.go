@@ -128,15 +128,98 @@ func (s *EntryStorage) CreateChildEntry(userId int, entry *NewChildEntry) (*Chil
     var insertQuery string
     var insertArgs []interface{}
 
-    if *entry.TagId == 0 {
-        insertQuery = `INSERT INTO entries (notebook_id, author_id, title, content, parent_entry_id, role)
+    if entry.Role == nil {
+        insertQuery = `INSERT INTO entries (notebook_id, author_id, title, content, parent_entry_id, tag_id)
                         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
-        insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, entry.ParentEntryId, entry.Role}
+        insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, entry.ParentEntryId, *entry.TagId}
     } else {
-        insertQuery = `INSERT INTO entries (notebook_id, author_id, title, content, tag_id, parent_entry_id. role, role)
+        insertQuery = `INSERT INTO entries (notebook_id, author_id, title, content, tag_id, parent_entry_id, role)
                         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
-        insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, *entry.TagId, *entry.ParentEntryId, entry.Role}
+        insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, *entry.TagId, *entry.ParentEntryId, *entry.Role}
     }
+
+    // Execute the insertion query and get the new entry ID
+    err := s.Conn.QueryRow(insertQuery, insertArgs...).Scan(&entryId)
+    if err != nil {
+        return nil, err
+    }
+
+    // Retrieve the newly created entry from the database
+    err = s.Conn.QueryRow(`SELECT id, notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id, role
+                           FROM entries
+                           WHERE id = $1`, entryId).Scan(
+        &newEntry.ID,
+        &newEntry.NotebookID,
+        &newEntry.AuthorId,
+        &newEntry.Title,
+        &newEntry.Content,
+        &newEntry.Timestamp,
+        &newEntry.TagId,
+        &newEntry.ParentEntryId,
+		&newEntry.Role,
+    )
+    if err != nil {
+        return nil, err
+    }
+
+    return &newEntry, nil
+}
+
+func (s *EntryStorage) UpdateChildEntry(userId int, entryId int, childEntryId int, entry *NewChildEntry) (*ChildrenEntry, error) {
+    var newEntry ChildrenEntry
+
+
+    // Prepare the SQL query for insertion
+    var insertQuery string
+    var insertArgs []interface{}
+
+	insertQuery = `UPDATE entries
+					SET notebook_id = $1, author_id = $2, title = $3, content = $4, role = $5, parent_entry_id = $6, tag_id = $7
+					WHERE id = $8
+					RETURNING id`
+	insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, entry.Role, entry.ParentEntryId, entry.TagId, childEntryId}
+
+
+    // Execute the insertion query and get the new entry ID
+    err := s.Conn.QueryRow(insertQuery, insertArgs...).Scan(&entryId)
+    if err != nil {
+        return nil, err
+    }
+
+    // Retrieve the newly created entry from the database
+    err = s.Conn.QueryRow(`SELECT id, notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id, role
+                           FROM entries
+                           WHERE id = $1`, entryId).Scan(
+        &newEntry.ID,
+        &newEntry.NotebookID,
+        &newEntry.AuthorId,
+        &newEntry.Title,
+        &newEntry.Content,
+        &newEntry.Timestamp,
+        &newEntry.TagId,
+        &newEntry.ParentEntryId,
+		&newEntry.Role,
+    )
+    if err != nil {
+        return nil, err
+    }
+
+    return &newEntry, nil
+}
+
+func (s *EntryStorage) UpdateEntry(userId int, entryId int, entry *NewEntry) (*Entry, error) {
+    var newEntry Entry
+
+    // Prepare the SQL query for insertion
+    var insertQuery string
+    var insertArgs []interface{}
+
+	insertQuery = `UPDATE entries
+					SET notebook_id = $1, author_id = $2, title = $3, content = $4, tag_id = $5, role = $6
+					WHERE id = $7
+					RETURNING id`
+	insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, *entry.TagId, entry.Role, entryId}
+
 
     // Execute the insertion query and get the new entry ID
     err := s.Conn.QueryRow(insertQuery, insertArgs...).Scan(&entryId)

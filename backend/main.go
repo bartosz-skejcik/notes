@@ -29,7 +29,7 @@ import (
 //		@description				Token in Bearer format to authenticate the user
 //		@host		localhost:3000
 //	    @BasePath	/api
-func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler) *fiber.App {
+func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler, tagHandlers *handlers.TagHandler) *fiber.App {
 
     // Initialize a new Fiber app
     app := fiber.New()
@@ -61,12 +61,18 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
     // entries
     notebooks.Get("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.GetEntries)
     notebooks.Post("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.CreateEntry)
+    notebooks.Patch("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.UpdateEntry)
     notebooks.Post("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.CreateChildEntry)
+    notebooks.Patch("/:notebookId/entries/:entryId/children/:childEntryId", authMiddleware.CheckAuth, entryHandlers.UpdateChildEntry)
     notebooks.Get("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.GetEntryById)
     notebooks.Get("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.GetEntryChildren)
     notebooks.Get("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.GetEntryPhotos)
     notebooks.Post("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.CreatePhoto)
 
+
+    // tags
+    tags := api.Group("/tags")
+    tags.Get("", authMiddleware.CheckAuth, tagHandlers.GetTags)
 
 
     // Health check route
@@ -100,17 +106,26 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
 func main() {
     fx.New(
         fx.Provide(
+            // config
             config.LoadEnvVars,
+            // database
             database.CreatePostgresConnection,
             database.CreateRedisConnection,
+            // auth
             auth.NewSessionManager,
+            middleware.NewAuthMiddleware,
+            // users
             handlers.NewUserHandler,
             storage.NewUserStorage,
-            middleware.NewAuthMiddleware,
-            handlers.NewNotebookHandler,
+            // notebooks
             storage.NewNotebookStorage,
+            handlers.NewNotebookHandler,
+            // entries
             storage.NewEntryStorage,
             handlers.NewEntryHandler,
+            // tags
+            storage.NewTagStorage,
+            handlers.NewTagHandler,
         ),
         fx.Invoke(NewFiberServer),
     ).Run()

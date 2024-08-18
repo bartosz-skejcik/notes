@@ -184,6 +184,155 @@ func (e *EntryHandler) CreateEntry(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(newEntry)
 }
 
+// @Summary Update the entry
+// @Description Update the entry
+// @Tags entries
+// @Accept json
+// @Produce json
+// @Param notebookId path int true "The notebook's id"
+// @Param entryId path int true "The entry's id"
+// @Param entry body entryRequestBody true "The entry's info"
+// @Success 200 {object} entrySuccessResponse
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
+// @Router /notebooks/{notebookId}/entries/{entryId} [patch]
+func (e *EntryHandler) UpdateEntry(c *fiber.Ctx) error {
+	// get the session from the authorization header
+	sessionHeader := c.Get("Authorization")
+
+	// get the session id
+	sessionId := sessionHeader[7:]
+
+	// get the user data from the session
+	user, err := e.SessionManager.GetSession(sessionId)
+	if err != nil {
+		fmt.Println("siema")
+		return c.JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the notebook id from the path
+	notebookId, err := strconv.Atoi(c.Params("notebookId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the entry id from the path
+	entryId, err := strconv.Atoi(c.Params("entryId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the entry info from the request body
+	var entry entryRequestBody
+
+	err = c.BodyParser(&entry)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// validate the entry struct
+	validate := validator.New()
+	err = validate.Struct(entry)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// update the entry
+	newEntry, err := e.Storage.UpdateEntry(user.Id, entryId, &storage.NewEntry{
+		NotebookID: notebookId,
+		Title: entry.Title,
+		Content: entry.Content,
+		HasPhoto: entry.HasPhoto,
+		Role: &entry.Role,
+		TagId: &entry.TagId,
+	})
+
+	if err != nil {
+		// Log the error or return it to the client
+		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(newEntry)
+}
+
+// @Summary Update the child entry
+// @Description Update the child entry
+// @Tags entries
+// @Accept json
+// @Produce json
+// @Param notebookId path int true "The notebook's id"
+// @Param entryId path int true "The entry's id"
+// @Param childEntryId path int true "The child entry's id"
+// @Param childEntry body childEntryRequestBody true "The child entry's info"
+// @Success 200 {object} entrySuccessResponse
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
+// @Router /notebooks/{notebookId}/entries/{entryId}/children/{childEntryId} [patch]
+func (e *EntryHandler) UpdateChildEntry(c *fiber.Ctx) error {
+	// get the session from the authorization header
+	sessionHeader := c.Get("Authorization")
+
+	// get the session id
+	sessionId := sessionHeader[7:]
+
+	// get the user data from the session
+	user, err := e.SessionManager.GetSession(sessionId)
+	if err != nil {
+		fmt.Println("siema")
+		return c.JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the notebook id from the path
+	notebookId, err := strconv.Atoi(c.Params("notebookId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the entry id from the path
+	entryId, err := strconv.Atoi(c.Params("entryId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the child entry id from the path
+	childEntryId, err := strconv.Atoi(c.Params("childEntryId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the child entry info from the request body
+	var childEntry childEntryRequestBody
+
+	err = c.BodyParser(&childEntry)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// validate the child entry struct
+	validate := validator.New()
+	err = validate.Struct(childEntry)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// update the child entry
+	newChildEntry, err := e.Storage.UpdateChildEntry(user.Id, entryId, childEntryId, &storage.NewChildEntry{
+		NotebookID: notebookId,
+		Title: childEntry.Title,
+		Content: childEntry.Content,
+		Role: &childEntry.Role,
+		ParentEntryId: &entryId,
+		TagId: &childEntry.TagId,
+	})
+
+	if err != nil {
+		// Log the error or return it to the client
+		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(newChildEntry)
+}
+
 // @Summary Create a child entry
 // @Description Create a child entry
 // @Tags entries
