@@ -66,9 +66,9 @@ type photoRequestBody struct {
 	MimeType string `json:"mime_type" validate:"required"`
 }
 
-// type entrySuccessResponse struct {
-// 	Id int `json:"id"`
-// }
+type entrySuccessResponse struct {
+	Id int `json:"id"`
+}
 
 type photoSuccessResponse struct {
 	Id int `json:"id"`
@@ -253,6 +253,54 @@ func (e *EntryHandler) UpdateEntry(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(newEntry)
+}
+
+// @Summary Delete the entry
+// @Description Delete the entry
+// @Tags entries
+// @Accept json
+// @Produce json
+// @Param notebookId path int true "The notebook's id"
+// @Param entryId path int true "The entry's id"
+// @Success 200 {object} entrySuccessResponse
+// @Failure 400 {object} handlers.Response{Success: false, Message: string}
+// @Failure 500 {object} handlers.Response{Success: false, Message: string}
+// @Router /notebooks/{notebookId}/entries/{entryId} [delete]
+func (e *EntryHandler) DeleteEntry(c *fiber.Ctx) error {
+	// get the session from the authorization header
+	sessionHeader := c.Get("Authorization")
+
+	// get the session id
+	sessionId := sessionHeader[7:]
+
+	// get the user data from the session
+	user, err := e.SessionManager.GetSession(sessionId)
+	if err != nil {
+		fmt.Println("siema")
+		return c.JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the notebook id from the path
+	notebookId, err := strconv.Atoi(c.Params("notebookId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// get the entry id from the path
+	entryId, err := strconv.Atoi(c.Params("entryId"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	// delete the entry and its photos
+	deletedEntryId, err := e.Storage.DeleteEntry(user.Id, notebookId, entryId)
+
+	if err != nil {
+		// Log the error or return it to the client
+		return c.Status(fiber.StatusInternalServerError).JSON(Response{Success: false, Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(entrySuccessResponse{Id: deletedEntryId})
 }
 
 // @Summary Update the child entry

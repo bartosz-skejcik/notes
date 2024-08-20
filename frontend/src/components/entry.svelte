@@ -1,7 +1,7 @@
 <!-- file: src/components/entry.svelte -->
 
 <script lang="ts">
-	import { addChildEntry } from '$lib/entry';
+	import { addChildEntry, convertEntriesToLocal } from '$lib/entry';
 	import type { Entry, LocalEntryType } from '$lib/entry';
 	import { Check, X } from 'lucide-svelte';
 	import { Button } from '$ui/button';
@@ -27,7 +27,7 @@
 
 	let { entries = $bindable(), entry, ...data }: Props = $props();
 
-	let localEntries = $derived(convertEntriesToLocal());
+	let localEntries = $derived(convertEntriesToLocal(entry));
 
 	async function acceptAIResponse() {
 		const e = localEntries[localEntries.length - 1];
@@ -146,30 +146,6 @@
 	}
 
 	$inspect(localEntries);
-
-	function convertEntriesToLocal(): LocalEntryType[] {
-		const result: LocalEntryType[] = [];
-
-		function processEntry(entry: Entry) {
-			result.push({
-				id: entry.id,
-				role: entry.role,
-				content: entry.title,
-				timestamp: entry.timestamp,
-				parent_entry_id: entry.parent_entry_id,
-				tag_id: entry.tag_id
-			});
-
-			// Process children recursively
-			if (entry.children && entry.children.length > 0) {
-				entry.children.forEach(processEntry);
-			}
-		}
-
-		processEntry(entry);
-
-		return result;
-	}
 </script>
 
 <div class="flex flex-col items-start justify-center w-full group">
@@ -179,6 +155,7 @@
 				{localEntries}
 				bind:addChildEntryPending
 				bind:entry
+				bind:entries
 				{i}
 				{e}
 				{pendingAIResponseAccept}
@@ -186,6 +163,7 @@
 				tags={data.tags}
 				sessionId={data.sessionId}
 				slug={data.slug}
+				notebook={data.notebook}
 			/>
 		</div>
 	{/each}

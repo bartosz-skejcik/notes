@@ -7,7 +7,17 @@
 	import { Textarea } from '$ui/textarea';
 	import { autoResize, deleteImage, handleFileUpload } from '$lib/entry-form';
 	import type { PageData } from '../routes/notebooks/[slug]/$types';
-	import { addChildEntry, addEntry, type Entry, type LocalEntryType } from '$lib/entry';
+	import {
+		addChildEntry,
+		addEntry,
+		deleteEntry,
+		updateChildEntry,
+		updateEntry,
+		type Entry,
+		type LocalEntryType
+	} from '$lib/entry';
+	import { fly } from 'svelte/transition';
+	import Page from '../routes/+page.svelte';
 
 	interface Props extends PageData {
 		childEntry?: boolean;
@@ -15,6 +25,10 @@
 		entries: Entry[];
 		entry?: Entry;
 		localEntries?: LocalEntryType[];
+		editEntryPending?: boolean | null;
+		content?: string;
+		entryId?: number;
+		onParentEntryDelete?: (id: number) => void;
 	}
 
 	let {
@@ -23,11 +37,21 @@
 		entries = $bindable(),
 		localEntries,
 		entry = $bindable(),
+		editEntryPending,
+		content,
+		entryId,
+		onParentEntryDelete,
 		...data
 	}: Props = $props();
 
 	let title = $state('');
 	let file = $state<File | undefined>(undefined);
+
+	$effect(() => {
+		if (content !== undefined) {
+			title = content;
+		}
+	});
 
 	let textAreaHeight = $state('auto');
 	let imagePreview = $state<string | null>(null);
@@ -72,37 +96,66 @@
 
 			if (!data.slug || typeof data.slug == undefined) return;
 
-			if (childEntry && entry && entry.id) {
-				console.log('adding child entry', childEntry, entry);
-				const newEntry = await addChildEntry(data.sessionId, data.slug, entry.id, {
-					title: title,
-					role: 'user',
-					tag_id: entry.tag_id ?? null
-				});
+			if (!entry) return;
 
-				if (newEntry !== null) {
-					// entries.unshift(newEntry);
-					// localEntries?.push({
-					// 	id: newEntry.id,
-					// 	role: newEntry.role,
-					// 	content: newEntry.title,
-					// 	timestamp: newEntry.timestamp,
-					// 	parent_entry_id: newEntry.parent_entry_id,
-					// 	tag_id: newEntry.tag_id
-					// });
-					entry.children.push({
-						notebook_id: entry.notebook_id,
-						id: newEntry.id,
-						role: newEntry.role,
-						author_id: entry.author_id,
-						title: newEntry.title,
-						content: newEntry.content,
-						timestamp: newEntry.timestamp,
-						has_photo: false,
-						children: [],
-						parent_entry_id: newEntry.parent_entry_id,
-						tag_id: newEntry.tag_id
+			if (entry.id) {
+				if (editEntryPending == true && title !== undefined && entryId) {
+					// // await updateEntry(data.sessionId, data.slug, entry.id, {
+					// // 	title: title,
+					// // 	role: 'user',
+					// // 	tag_id: entry.tag_id ?? null
+					// // });
+
+					if (childEntry) {
+						console.log('updating child entry', childEntry, entryId);
+
+						const childEntryObject = entry.children.find((ent) => ent.id === entryId);
+
+						await updateChildEntry(data.sessionId, data.slug, entry.id, entryId, {
+							...childEntryObject,
+							title: title
+						});
+
+						entry.children.forEach((ent) => {
+							if (ent.id === entryId) {
+								ent.title = title;
+							}
+						});
+					} else {
+						console.log('updating entry', entry, entryId);
+						await updateEntry(data.sessionId, data.slug, entry.id, {
+							title: title
+						});
+
+						entry.title = title;
+					}
+				} else if (childEntry) {
+					console.log('adding child entry', childEntry);
+					const newEntry = await addChildEntry(data.sessionId, data.slug, entry.id, {
+						title: title,
+						role: 'user',
+						tag_id: entry.tag_id ?? null
 					});
+
+					if (newEntry !== null) {
+						if (!entry.children) {
+							entry.children = [];
+						}
+
+						entry.children.push({
+							notebook_id: entry.notebook_id,
+							id: newEntry.id,
+							role: newEntry.role,
+							author_id: entry.author_id,
+							title: newEntry.title,
+							content: newEntry.content,
+							timestamp: newEntry.timestamp,
+							has_photo: false,
+							children: [],
+							parent_entry_id: newEntry.parent_entry_id,
+							tag_id: newEntry.tag_id
+						});
+					}
 				}
 			} else {
 				console.log('adding entry');
@@ -125,6 +178,14 @@
 
 		reader.readAsDataURL(file);
 	}
+
+	function animate(node: HTMLElement, args: any): any {
+		if (editEntryPending === true) {
+			return fly(node, args);
+		} else {
+			return fly(node, args);
+		}
+	}
 </script>
 
 <form
@@ -132,7 +193,7 @@
 		e.preventDefault();
 		handleSubmit(e);
 	}}
-	class="w-full py-2 mb-2"
+	class={`w-full mb-2 ${editEntryPending ? 'pb-2' : 'py-2'}`}
 >
 	<div class="w-full">
 		<Textarea
@@ -140,7 +201,7 @@
 			name="title"
 			id="title"
 			style="word-wrap: break-word; height: {textAreaHeight};"
-			class="w-3/4 px-0 ml-2 overflow-hidden text-lg border-none shadow-none resize-none focus-visible:ring-0 whitespace-break-spaces"
+			class={`w-3/4 px-0 overflow-hidden text-lg border-none shadow-none resize-none focus-visible:ring-0 whitespace-break-spaces ${editEntryPending ? 'ml-0 py-0' : 'ml-2'}`}
 			placeholder="What are you thinking?"
 			rows={1}
 		/>
@@ -162,7 +223,10 @@
 			</button>
 		</div>
 	{/if}
-	<div class="flex items-center justify-between w-full 2xl:justify-start 2xl:gap-4">
+	<div
+		transition:animate={{ y: -20, duration: 300 }}
+		class="flex items-center justify-between w-full 2xl:justify-start 2xl:gap-4"
+	>
 		<Label for="image_upload" class="cursor-pointer">
 			<div class="p-1 rounded-lg hover:bg-muted-foreground/20 text-foreground bg-muted">
 				<Image class="w-5 h-5" />
@@ -184,19 +248,58 @@
 				)}
 		/>
 		<div class="flex items-center justify-end w-full gap-2">
-			{#if childEntry}
-				<Button variant="red_ghost" size="sm" class="px-3 h-7" onclick={onClose}>
+			{#if childEntry || editEntryPending}
+				<Button
+					variant="red_ghost"
+					size="sm"
+					class="px-3 h-7"
+					onclick={async () => {
+						if (editEntryPending) {
+							// delete entry
+							if (data.slug && entryId) {
+								const deletedEntry = await deleteEntry(data.sessionId, data.slug, entryId);
+
+								if (deletedEntry && deletedEntry.id) {
+									// get the index of the deleted entry
+									let index = -1;
+
+									if (childEntry && entry) {
+										index = entry.children.findIndex((e) => e.id === deletedEntry.id);
+
+										console.log('child, index', index);
+
+										// splice the deleted entry from the entries array
+										entry.children.splice(index, 1);
+
+										console.log('deleted entry', deletedEntry.id, index);
+									} else {
+										onParentEntryDelete && onParentEntryDelete(deletedEntry.id);
+									}
+								}
+							}
+						} else {
+							onClose && onClose();
+						}
+					}}
+				>
 					<X class="w-5 h-5 mr-2" />
-					Close
+					{#if editEntryPending}
+						Delete
+					{:else}
+						Close
+					{/if}
 				</Button>
 			{/if}
 			<Button
 				type="submit"
 				variant="default"
-				size={childEntry ? 'sm' : 'default'}
-				class={`${childEntry ? 'h-7 px-3' : 'h-8'} w-fit`}
+				size={childEntry || editEntryPending ? 'sm' : 'default'}
+				class={`${childEntry || editEntryPending ? 'h-7 px-3' : 'h-8'} w-fit`}
 			>
-				{#if childEntry}
+				{#if editEntryPending}
+					<Check class="w-5 h-5 mr-2" />
+					Update
+				{:else if childEntry}
 					<Check class="w-5 h-5 mr-2" />
 					Reply
 				{:else}

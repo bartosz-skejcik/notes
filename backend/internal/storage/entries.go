@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -170,24 +171,42 @@ func (s *EntryStorage) UpdateChildEntry(userId int, entryId int, childEntryId in
 
 
     // Prepare the SQL query for insertion
-    var insertQuery string
-    var insertArgs []interface{}
+    var insertQueryWithTagId string
+	var insertQueryWithoutTagId string
+    var insertArgsWithTagId []interface{}
+	var insertArgsWithoutTagId []interface{}
 
-	insertQuery = `UPDATE entries
-					SET notebook_id = $1, author_id = $2, title = $3, content = $4, role = $5, parent_entry_id = $6, tag_id = $7
-					WHERE id = $8
+	insertQueryWithTagId = `UPDATE entries
+                    SET notebook_id = $1, author_id = $2, title = $3, content = $4, role = $5, parent_entry_id = $6, tag_id = $7
+                    WHERE id = $8
+                    RETURNING id`
+	insertArgsWithTagId = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, *entry.Role, *entry.ParentEntryId, *entry.TagId, childEntryId}
+
+	insertQueryWithoutTagId = `UPDATE entries
+					SET notebook_id = $1, author_id = $2, title = $3, content = $4, role = $5, parent_entry_id = $6
+					WHERE id = $7
 					RETURNING id`
-	insertArgs = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, entry.Role, entry.ParentEntryId, entry.TagId, childEntryId}
+	insertArgsWithoutTagId = []interface{}{entry.NotebookID, userId, entry.Title, entry.Content, *entry.Role, *entry.ParentEntryId, childEntryId}
 
 
-    // Execute the insertion query and get the new entry ID
-    err := s.Conn.QueryRow(insertQuery, insertArgs...).Scan(&entryId)
-    if err != nil {
-        return nil, err
-    }
+    if *entry.TagId != 0 {
+		fmt.Println(*entry.TagId)
+		// Execute the insertion query and get the new entry ID
+		err := s.Conn.QueryRow(insertQueryWithTagId, insertArgsWithTagId...).Scan(&entryId)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fmt.Println(*entry.TagId)
+		// Execute the insertion query and get the new entry ID
+		err := s.Conn.QueryRow(insertQueryWithoutTagId, insertArgsWithoutTagId...).Scan(&entryId)
+		if err != nil {
+			return nil, err
+		}
+	}
 
     // Retrieve the newly created entry from the database
-    err = s.Conn.QueryRow(`SELECT id, notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id, role
+    err := s.Conn.QueryRow(`SELECT id, notebook_id, author_id, title, content, timestamp, tag_id, parent_entry_id, role
                            FROM entries
                            WHERE id = $1`, entryId).Scan(
         &newEntry.ID,
@@ -248,6 +267,36 @@ func (s *EntryStorage) UpdateEntry(userId int, entryId int, entry *NewEntry) (*E
     return &newEntry, nil
 }
 
+func (s *EntryStorage) DeleteEntry(userId int, notebookId int, entryId int) (int, error) {
+	var deletedEntryId int
+
+	err := s.Conn.QueryRow(`DELETE FROM entries
+		WHERE id = $1
+		AND notebook_id = $2
+		AND author_id = $3
+		RETURNING id`,
+		entryId,
+		notebookId,
+		userId,
+	).Scan(&deletedEntryId)
+	if err != nil {
+		return 0, err
+	}
+
+
+	// Delete the photos associated with the entry
+	_, err = s.Conn.Exec(`DELETE FROM photos
+		WHERE entry_id = $1
+		AND author_id = $2`,
+		entryId,
+		userId,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedEntryId, nil
+}
 
 func (s *EntryStorage) GetEntriesForNotebook(userId int, notebookId int) ([]Entry, error) {
 	rows, err := s.Conn.Query(`SELECT id, notebook_id, author_id, title, content, timestamp, has_photo, tag_id, parent_entry_id, role

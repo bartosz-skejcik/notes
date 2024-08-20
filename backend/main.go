@@ -62,6 +62,7 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
     notebooks.Get("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.GetEntries)
     notebooks.Post("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.CreateEntry)
     notebooks.Patch("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.UpdateEntry)
+    notebooks.Delete("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.DeleteEntry)
     notebooks.Post("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.CreateChildEntry)
     notebooks.Patch("/:notebookId/entries/:entryId/children/:childEntryId", authMiddleware.CheckAuth, entryHandlers.UpdateChildEntry)
     notebooks.Get("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.GetEntryById)

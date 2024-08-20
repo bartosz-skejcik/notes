@@ -1,5 +1,5 @@
 <div
-	class="m-0 px-[22px] py-[22px] flex flex-col justify-start items-start rounded-lg bg-cover bg-center h-[380px] text-[#1b1d1b] max-w-[800px]"
+	class="m-0 px-[22px] py-[22px] flex flex-col justify-start items-start rounded-lg bg-cover bg-center h-[380px] text-[#1b1d1b] max-w-full"
 	style="background-image: url('/garden.jpeg')"
 >
 	<div

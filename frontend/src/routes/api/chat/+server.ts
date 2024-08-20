@@ -14,6 +14,8 @@ export const POST = (async ({ request }) => {
 	const data = new StreamData();
 	data.append({ test: 'value' });
 
+	console.log(messages);
+
 	try {
 		const result = await streamText({
 			model: groq('llama-3.1-70b-versatile'),

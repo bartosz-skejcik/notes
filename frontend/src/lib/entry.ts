@@ -39,7 +39,7 @@ type FetchedEntry = {
 export type NewEntry = {
 	title: string;
 	content?: string;
-	role: string;
+	role?: string;
 	tag_id?: number | null;
 	parent_entry_id?: number | null;
 };
@@ -47,7 +47,7 @@ export type NewEntry = {
 export type NewChildEntry = {
 	title: string;
 	content?: string;
-	role: string;
+	role?: string;
 	tag_id?: number | null;
 	parent_entry_id?: number | null;
 };
@@ -195,7 +195,7 @@ export async function updateChildEntry(
 	childEntryId: number,
 	childEntry: NewChildEntry
 ): Promise<Entry | null> {
-	console.log(entryId, childEntry);
+	console.log(childEntryId, childEntry);
 	try {
 		const res = await api.patch(
 			`/api/notebooks/${slug}/entries/${entryId}/children/${childEntryId}`,
@@ -247,4 +247,54 @@ export async function updateEntry(
 		console.log(error.response.data);
 		return null;
 	}
+}
+
+export async function deleteEntry(
+	sessionId: string,
+	slug: string,
+	entryId: number
+): Promise<{ id: number } | null> {
+	try {
+		const res = await api.delete(`/api/notebooks/${slug}/entries/${entryId}`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${sessionId}`
+			}
+		});
+
+		if (res.status === 200) {
+			return res.data;
+		} else {
+			console.log(res.data);
+			return null;
+		}
+	} catch (error) {
+		// @ts-expect-error asd
+		console.log(error.response.data);
+		return null;
+	}
+}
+
+export function convertEntriesToLocal(entry: Entry): LocalEntryType[] {
+	const result: LocalEntryType[] = [];
+
+	function processEntry(entry: Entry) {
+		result.push({
+			id: entry.id,
+			role: entry.role,
+			content: entry.title,
+			timestamp: entry.timestamp,
+			parent_entry_id: entry.parent_entry_id,
+			tag_id: entry.tag_id
+		});
+
+		// Process children recursively
+		if (entry.children && entry.children.length > 0) {
+			entry.children.forEach(processEntry);
+		}
+	}
+
+	processEntry(entry);
+
+	return result;
 }

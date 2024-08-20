@@ -35,7 +35,7 @@
 						class="col-span-3"
 						name="name"
 						type="text"
-						placeholder="Personal"
+						placeholder="eg. Personal, School, Work"
 						aria-invalid={$errors.name ? 'true' : undefined}
 						bind:value={$form.name}
 						{...$constraints.name}
