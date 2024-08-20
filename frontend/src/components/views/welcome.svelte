@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Button } from '$ui/button';
-	import { ArrowRight, Trash } from 'lucide-svelte/icons';
+	import { ArrowRight, NotebookTabs, Presentation, Trash } from 'lucide-svelte/icons';
 	import type { PageData } from '../../routes/$types';
+	import NotebookButton from '$components/notebook-button.svelte';
 
 	let { notebooks, session }: PageData = $props();
 
@@ -9,8 +10,14 @@
 		window.location.href = '/new-notebook';
 	}
 
-	function navigate(path: string) {
-		window.location.href = path;
+	let openedNotebook = $state<number | null>(null);
+
+	function toggleNotebook(i: number) {
+		if (openedNotebook === i) {
+			openedNotebook = null;
+		} else {
+			openedNotebook = i;
+		}
 	}
 </script>
 
@@ -33,32 +40,11 @@
 			<p class="text-muted-foreground">or open an existing one</p>
 		{/if}
 		<div
-			class="flex flex-col items-center justify-center w-full divide-y rounded-lg gap-y-1 bg-foreground/10 divide-background"
+			class="relative z-10 flex flex-col items-center justify-center w-full rounded-lg gap-y-0.5 divide-background"
 		>
 			{#if notebooks}
-				{#each notebooks! as notebook}
-					<div class="flex items-center justify-between w-full gap-2 py-1 pl-3 pr-2">
-						<div class="flex flex-col items-start justify-center">
-							<span class="font-medium">{notebook.name}</span>
-							<span class="text-xs text-muted-foreground"
-								>{new Date(notebook.created_at).toLocaleDateString('en-PL', {
-									year: 'numeric',
-									month: 'long',
-									day: 'numeric'
-								})}</span
-							>
-						</div>
-						<div class="flex items-center gap-2">
-							<Button variant="red_ghost" class="px-3">
-								<Trash class="w-4 h-4" />
-							</Button>
-							<Button
-								on:click={() => navigate(`/notebooks/${notebook.id}`)}
-								variant="ghost"
-								class="bg-foreground/10 hover:bg-foreground/20">Open</Button
-							>
-						</div>
-					</div>
+				{#each notebooks! as notebook, i}
+					<NotebookButton {notebook} {notebooks} {i} {toggleNotebook} open={openedNotebook === i} />
 				{/each}
 			{/if}
 		</div>
