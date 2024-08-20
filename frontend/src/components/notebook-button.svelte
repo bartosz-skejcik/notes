@@ -55,7 +55,7 @@
 				Journal
 			</Button>
 			<Button
-				onclick={() => navigate(`/whiteboard/${notebook.id}`)}
+				onclick={() => navigate(`/whiteboards/${notebook.id}`)}
 				variant="ghost"
 				class="w-1/2 bg-foreground/10 hover:bg-foreground/20"
 			>
