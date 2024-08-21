@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { NotebookTabs, Presentation, Trash } from 'lucide-svelte/icons';
+	import { ChevronDown, NotebookTabs, Presentation, Trash } from 'lucide-svelte/icons';
 	import { Button } from '$ui/button';
 	import type { Notebook } from '../routes/+page.server';
 	import { slide } from 'svelte/transition';
@@ -38,6 +38,13 @@
 		<div class="relative z-20 flex items-center gap-2">
 			<Button variant="red_ghost" class="px-3">
 				<Trash class="w-4 h-4" />
+			</Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				class="w-7 h-7 outline outline-1 outline-muted-foreground hover:bg-muted-foreground/20"
+			>
+				<ChevronDown class={`w-4 h-4 transition-all duration-200 ${open ? 'rotate-180' : ''}`} />
 			</Button>
 		</div>
 	</div>
