@@ -17,7 +17,7 @@
 		type LocalEntryType
 	} from '$lib/entry';
 	import { fly } from 'svelte/transition';
-	import Page from '../routes/+page.svelte';
+	// import Page from '../routes/+page.svelte';
 
 	interface Props extends PageData {
 		childEntry?: boolean;
@@ -92,13 +92,17 @@
 		reader.onload = async (e) => {
 			const img = reader.result as string;
 
-			if (!data.sessionId) return;
+			if (!data.sessionId) {
+				console.log('no session id');
+				return;
+			}
 
-			if (!data.slug || typeof data.slug == undefined) return;
+			if (!data.slug || typeof data.slug == undefined) {
+				console.log('no slug');
+				return;
+			}
 
-			if (!entry) return;
-
-			if (entry.id) {
+			if (entry && entry.id) {
 				if (editEntryPending == true && title !== undefined && entryId) {
 					// // await updateEntry(data.sessionId, data.slug, entry.id, {
 					// // 	title: title,
