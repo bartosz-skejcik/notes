@@ -55,6 +55,24 @@ CREATE TABLE IF NOT EXISTS settings (
     value VARCHAR NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS categories (
+    id SERIAL PRIMARY KEY,
+    notebook_id INT REFERENCES notebooks(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    color VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sticky_notes (
+    id SERIAL PRIMARY KEY,
+    notebook_id INT REFERENCES notebooks(id) ON DELETE CASCADE,
+    category_id INT REFERENCES categories(id) ON DELETE CASCADE,
+    author_id INT REFERENCES users(id) ON DELETE SET NULL,
+    title VARCHAR NOT NULL,
+    content TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Add indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_notebooks_user_id ON notebooks(user_id);

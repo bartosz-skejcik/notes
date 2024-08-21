@@ -1,8 +1,13 @@
-<script>
+<script lang="ts">
 	import ThemeSwitcher from '$components/theme-switcher.svelte';
 
 	import { Button } from '$ui/button';
 	import { Home, Settings } from 'lucide-svelte';
+	import type { LayoutData } from '../$types';
+
+	let { data }: { data: LayoutData } = $props();
+
+	console.log(data);
 </script>
 
 <nav class="sticky top-0 flex items-center justify-between px-3 py-2 z-4 bg-background">

@@ -1,7 +1,7 @@
 <!-- file: src/routes/notebooks/+layout.svelte -->
 
 <script lang="ts">
-	import Sidebar from '$components/sidebar.svelte';
+	import Sidebar from '$components/notebooks/sidebar.svelte';
 
 	const { data, children }: { data: any; children: any } = $props();
 </script>

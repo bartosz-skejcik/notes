@@ -29,7 +29,7 @@ import (
 //		@description				Token in Bearer format to authenticate the user
 //		@host		localhost:3000
 //	    @BasePath	/api
-func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler, tagHandlers *handlers.TagHandler) *fiber.App {
+func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler, tagHandlers *handlers.TagHandler, categoryHandlers *handlers.CategoryHandler) *fiber.App {
 
     // Initialize a new Fiber app
     app := fiber.New()
@@ -69,6 +69,11 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
     notebooks.Get("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.GetEntryChildren)
     notebooks.Get("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.GetEntryPhotos)
     notebooks.Post("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.CreatePhoto)
+
+    // categories
+    categories := api.Group("/notebooks/:notebookId/categories")
+    categories.Get("", authMiddleware.CheckAuth, categoryHandlers.GetCategories)
+    categories.Post("", authMiddleware.CheckAuth, categoryHandlers.CreateCategory)
 
 
     // tags
@@ -127,6 +132,9 @@ func main() {
             // tags
             storage.NewTagStorage,
             handlers.NewTagHandler,
+            // categories
+            storage.NewCategoryStorage,
+            handlers.NewCategoryHandler,
         ),
         fx.Invoke(NewFiberServer),
     ).Run()
