@@ -14,12 +14,16 @@
 </script>
 
 <div
-	class="flex flex-col items-start justify-start w-full h-full py-2 pl-4 pr-1 border-r border-foreground/10"
+	class="flex flex-col items-start justify-start w-full h-full py-2 pl-4 pr-2 border-r border-foreground/10"
 >
-	<header class="flex items-start justify-start w-full gap-2 py-1 mb-4 text-sm text-foreground/80">
+	<header
+		class="flex items-start justify-start w-full gap-2 py-1 mb-4 text-[0.9rem] text-foreground/80"
+	>
 		<span class="whitespace-nowrap">My Library</span>
 		<span class="text-muted-foreground">{'/'}</span>
-		<span class="whitespace-nowrap">{currentCategory?.name ?? 'Recents'}</span>
+		<span class="whitespace-nowrap" style={`color: ${currentCategory?.color}`}
+			>{currentCategory?.name ?? 'Recents'}</span
+		>
 	</header>
 	<div class="flex flex-col items-start justify-start w-full mb-2 gap-y-1">
 		<a

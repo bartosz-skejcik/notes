@@ -15,7 +15,7 @@
 
 	let name = $state('New category');
 	let color = $state('#2563eb');
-	let id = categories[categories.length - 1].id + 1;
+	let id = categories[categories.length - 1] ? categories[categories.length - 1].id + 1 : 1;
 
 	async function handleSubmit() {
 		if (notebookId && sessionId) {
