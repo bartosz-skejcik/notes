@@ -10,10 +10,6 @@
 
 	let { categories, view }: Props = $props();
 
-	$effect(() => {
-		console.log(view);
-	});
-
 	let currentCategory = $derived(categories.find((c) => c.id.toString() === view) ?? null);
 </script>
 
@@ -25,7 +21,7 @@
 		<span class="text-muted-foreground">{'/'}</span>
 		<span class="whitespace-nowrap">{currentCategory?.name ?? 'Recents'}</span>
 	</header>
-	<div class="flex flex-col items-start justify-start w-full mb-3 gap-y-1">
+	<div class="flex flex-col items-start justify-start w-full mb-2 gap-y-1">
 		<a
 			href="?view=recent"
 			class={`flex items-center justify-start gap-1 py-1 text-sm text-foreground ${view === 'recent' ? 'font-medium' : 'font-normal text-foreground/70'}`}
@@ -49,10 +45,12 @@
 				<Plus class="w-4 h-4" />
 			</Button>
 			<!-- big add category button -->
-			<Button variant="ghost" class="px-2 text-xs h-7">
-				<Plus class="w-4 h-4 mr-2" />
-				Add
-			</Button>
+			<a href="?open=true">
+				<Button variant="ghost" class="px-2 text-xs h-7">
+					<Plus class="w-4 h-4 mr-2" />
+					Add
+				</Button>
+			</a>
 		</div>
 		{#each categories as category}
 			<a

@@ -27,17 +27,21 @@ export async function createCategory(
 	name: string,
 	color: string,
 	sessionId: string
-): Promise<Category> {
-	const res = await api.post('/api/notebooks/' + notebookId + '/categories', {
-		headers: {
-			ContentType: 'application/json',
-			Authorization: 'Bearer ' + sessionId
-		},
-		body: {
+): Promise<{ id: number } | null> {
+	console.log('api create Category', notebookId, name, color, sessionId);
+	const res = await api.post(
+		'/api/notebooks/' + notebookId + '/categories',
+		{
 			name,
 			color
+		},
+		{
+			headers: {
+				ContentType: 'application/json',
+				Authorization: 'Bearer ' + sessionId
+			}
 		}
-	});
+	);
 
 	if (res.status !== 200) {
 		throw new Error('Failed to create category');

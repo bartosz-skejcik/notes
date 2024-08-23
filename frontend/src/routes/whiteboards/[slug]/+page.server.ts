@@ -1,3 +1,4 @@
+import { getCategories } from '$lib/whiteboard/categories';
 import {
 	getStickyNotes,
 	getStickyNotesForUserCategory,
@@ -33,8 +34,16 @@ export async function load({ url, params, cookies }: ServerLoadEvent) {
 		}
 	}
 
+	const open = url.searchParams.get('open');
+
+	const categories = await getCategories(params.slug, sessionId);
+
 	return {
-		view,
-		sticky_notes
+		sticky_notes,
+		open,
+		categories,
+		slug: params.slug,
+		sessionId,
+		view: view ?? 'recent'
 	};
 }
