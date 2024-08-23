@@ -1,7 +1,7 @@
 import { getCategories } from '$lib/whiteboard/categories.js';
-import { error, redirect } from '@sveltejs/kit';
+import { error, redirect, type ServerLoadEvent } from '@sveltejs/kit';
 
-export async function load({ cookies, params }) {
+export async function load({ cookies, params, url }: ServerLoadEvent) {
 	const sessionId = cookies.get('sessionId');
 
 	if (!sessionId) {
@@ -12,15 +12,16 @@ export async function load({ cookies, params }) {
 		throw error(404, 'Not found');
 	}
 
-	console.log(params.slug);
+	// get the query param named whiteboard
+
+	const view = url.searchParams.get('view');
 
 	const categories = await getCategories(params.slug, sessionId);
-
-	console.log(categories);
 
 	return {
 		sessionId,
 		slug: params.slug,
-		categories
+		categories,
+		view: view ?? 'recent'
 	};
 }

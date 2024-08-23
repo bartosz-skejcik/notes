@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$ui/button';
 
-	import { Sun, Moon, StickyNote } from 'lucide-svelte/icons';
+	import { Sun, Moon, ScrollText } from 'lucide-svelte/icons';
 	import { theme, setTheme } from '$stores/theme';
 	import { onMount } from 'svelte';
 
@@ -25,7 +25,7 @@
 		<Moon class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75" />
 	{/if}
 	{#if $theme === 'paper'}
-		<StickyNote
+		<ScrollText
 			class="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-75"
 		/>
 	{/if}

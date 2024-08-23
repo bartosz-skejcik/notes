@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, NotebookTabs, Presentation, Trash } from 'lucide-svelte/icons';
+	import { ChevronDown, NotebookTabs, Presentation, StickyNote, Trash } from 'lucide-svelte/icons';
 	import { Button } from '$ui/button';
 	import type { Notebook } from '../routes/+page.server';
 	import { slide } from 'svelte/transition';
@@ -66,8 +66,8 @@
 				variant="ghost"
 				class="w-1/2 bg-foreground/10 hover:bg-foreground/20"
 			>
-				<Presentation class="w-4 h-4 mr-2" />
-				Whiteboard
+				<StickyNote class="w-4 h-4 mr-2" />
+				Notes
 			</Button>
 		</div>
 	{/if}

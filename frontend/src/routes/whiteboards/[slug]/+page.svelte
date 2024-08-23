@@ -2,29 +2,26 @@
 	import ThemeSwitcher from '$components/theme-switcher.svelte';
 
 	import { Button } from '$ui/button';
-	import { Home, Settings } from 'lucide-svelte';
-	import type { LayoutData } from '../$types';
+	import { Home, Plus, Settings, Trash } from 'lucide-svelte';
+	import type { PageData } from './$types';
+	import Note from '$components/whiteboard/note.svelte';
 
-	let { data }: { data: LayoutData } = $props();
-
-	console.log(data);
+	let { data }: { data: PageData } = $props();
 </script>
 
-<nav class="sticky top-0 flex items-center justify-between px-3 py-2 z-4 bg-background">
-	<div class="flex items-center gap-2 text-[0.97rem] text-muted-foreground">
-		<!-- <p>{data.notebook.name}</p> -->
-		<span>•</span>
-		<p>
-			{new Date().toLocaleString('en-PL', {
-				weekday: 'long',
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric'
-			})}
-		</p>
-	</div>
-	<div class="flex items-center justify-end w-1/2 gap-4">
-		<!-- <CommandSearch items={convertEntriesToItems(entries)} onChange={search.setValue} /> -->
+<nav class="sticky top-0 flex items-center justify-end px-3 py-2 z-4 bg-background">
+	<!-- <div class="flex items-center justify-center gap-4">
+
+	</div> -->
+	<div class="flex items-center justify-center gap-4">
+		<Button variant="red_ghost" size="sm" class="border border-red-500/20">
+			<Trash class="w-4 h-4 mr-2" />
+			Delete
+		</Button>
+		<Button variant="outline" size="sm">
+			<Plus class="w-4 h-4 mr-2" />
+			Add item
+		</Button>
 		<div class="flex items-center justify-center gap-3">
 			<ThemeSwitcher />
 			<Button size="icon" variant="ghost" class={'relative text-muted-foreground w-8 h-8'}>
@@ -41,14 +38,10 @@
 		</div>
 	</div>
 </nav>
-<div class="p-3 pb-20 space-y-1">
-	<!-- <EntryForm {...data} bind:entries />
-	{#each entries as entry, i (i)}
-		<div animate:flip={{ duration: 300, easing: quintOut }} class="w-full">
-			<Entry bind:entries {entry} {...data} tags={data.tags} />
-		</div>
+<div
+	class="grid flex-1 w-full h-full grid-cols-3 gap-3 p-3 pb-20 place-content-start xl:grid-cols-5 lg:grid-cols-4"
+>
+	{#each data.sticky_notes as sticky_note}
+		<Note categories={data.categories} {sticky_note} />
 	{/each}
-	{#if entries.length === 0}
-		<Encuragement />
-	{/if} -->
 </div>
