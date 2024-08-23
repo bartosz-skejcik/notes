@@ -15,8 +15,6 @@ type CategoryHandler struct {
 }
 
 type categoryRequestBody struct {
-	NotebookId int `json:"notebook_id" validate:"required"`
-	UserId int `json:"user_id" validate:"required"`
 	Name string `json:"name" validate:"required"`
 	Color string `json:"color" validate:"required"`
 }
