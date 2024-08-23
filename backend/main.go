@@ -29,7 +29,7 @@ import (
 //		@description				Token in Bearer format to authenticate the user
 //		@host		localhost:3000
 //	    @BasePath	/api
-func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler, tagHandlers *handlers.TagHandler, categoryHandlers *handlers.CategoryHandler) *fiber.App {
+func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, notebookHandlers *handlers.NotebookHandler, entryHandlers *handlers.EntryHandler, tagHandlers *handlers.TagHandler, categoryHandlers *handlers.CategoryHandler, stickyNoteHandlers *handlers.StickyNoteHandler) *fiber.App {
 
     // Initialize a new Fiber app
     app := fiber.New()
@@ -60,13 +60,17 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
 
     // entries
     notebooks.Get("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.GetEntries)
+    notebooks.Get("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.GetEntryById)
     notebooks.Post("/:notebookId/entries", authMiddleware.CheckAuth, entryHandlers.CreateEntry)
     notebooks.Patch("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.UpdateEntry)
     notebooks.Delete("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.DeleteEntry)
+
+    // child entries
     notebooks.Post("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.CreateChildEntry)
-    notebooks.Patch("/:notebookId/entries/:entryId/children/:childEntryId", authMiddleware.CheckAuth, entryHandlers.UpdateChildEntry)
-    notebooks.Get("/:notebookId/entries/:entryId", authMiddleware.CheckAuth, entryHandlers.GetEntryById)
     notebooks.Get("/:notebookId/entries/:entryId/children", authMiddleware.CheckAuth, entryHandlers.GetEntryChildren)
+    notebooks.Patch("/:notebookId/entries/:entryId/children/:childEntryId", authMiddleware.CheckAuth, entryHandlers.UpdateChildEntry)
+
+    // photos
     notebooks.Get("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.GetEntryPhotos)
     notebooks.Post("/:notebookId/entries/:entryId/photos", authMiddleware.CheckAuth, entryHandlers.CreatePhoto)
 
@@ -74,6 +78,11 @@ func NewFiberServer(lc fx.Lifecycle, userHandlers *handlers.UserHandler, authMid
     categories := api.Group("/notebooks/:notebookId/categories")
     categories.Get("", authMiddleware.CheckAuth, categoryHandlers.GetCategories)
     categories.Post("", authMiddleware.CheckAuth, categoryHandlers.CreateCategory)
+
+    // sticky notes
+    categories.Get("/sticky-notes", authMiddleware.CheckAuth, stickyNoteHandlers.GetAllStickyNotesForUser)
+    categories.Get("/:categoryId/sticky-notes", authMiddleware.CheckAuth, stickyNoteHandlers.GetStickyNotesForUserCategory)
+    categories.Post("/:categoryId/sticky-notes", authMiddleware.CheckAuth, stickyNoteHandlers.CreateStickyNote)
 
 
     // tags
@@ -135,6 +144,9 @@ func main() {
             // categories
             storage.NewCategoryStorage,
             handlers.NewCategoryHandler,
+            // sticky notes
+            storage.NewStickyNoteStorage,
+            handlers.NewStickyNoteHandler,
         ),
         fx.Invoke(NewFiberServer),
     ).Run()
