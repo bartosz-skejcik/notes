@@ -59,7 +59,7 @@
 		{#each categories as category}
 			<a
 				href="?view={category.id}"
-				class={`flex items-center justify-start gap-2 py-1 text-sm ${
+				class={`flex items-center justify-start gap-2 py-1 text-sm w-full ${
 					category.id.toString() === view
 						? 'font-medium text-foreground'
 						: 'font-normal text-foreground/70'
@@ -67,6 +67,9 @@
 			>
 				<div style={`background: ${category.color}`} class={`rounded-full w-3.5 h-3.5`}></div>
 				{category.name}
+				<div class="flex items-center justify-end flex-1 w-full">
+					{category.noteCount}
+				</div>
 			</a>
 		{/each}
 	</div>

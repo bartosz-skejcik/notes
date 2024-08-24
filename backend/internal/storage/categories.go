@@ -26,6 +26,7 @@ type Category struct {
 	NotebookId int `json:"notebookId"`
 	Name string `json:"name"`
 	Color string `json:"color"`
+	NoteCount int `json:"noteCount"`
 }
 
 func (s *CategoryStorage) CreateCategory(category *NewCategory) (int, error) {
@@ -39,23 +40,33 @@ func (s *CategoryStorage) CreateCategory(category *NewCategory) (int, error) {
 }
 
 func (s *CategoryStorage) GetCategories(notebookId int, userId int) ([]Category, error) {
-	rows, err := s.Conn.Query("SELECT id, notebook_id, name, color FROM categories WHERE notebook_id = $1 AND user_id = $2", notebookId, userId)
+    query := `
+        SELECT c.id, c.notebook_id, c.name, c.color, COALESCE(note_count, 0) as note_count
+        FROM categories c
+        LEFT JOIN (
+            SELECT category_id, COUNT(*) as note_count
+            FROM sticky_notes
+            GROUP BY category_id
+        ) sn ON c.id = sn.category_id
+        WHERE c.notebook_id = $1 AND c.user_id = $2
+    `
 
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+    rows, err := s.Conn.Query(query, notebookId, userId)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
 
-	categories := make([]Category, 0)
+    categories := make([]Category, 0)
 
-	for rows.Next() {
-		var category Category
-		err = rows.Scan(&category.Id, &category.NotebookId, &category.Name, &category.Color)
-		if err != nil {
-			return nil, err
-		}
-		categories = append(categories, category)
-	}
+    for rows.Next() {
+        var category Category
+        err = rows.Scan(&category.Id, &category.NotebookId, &category.Name, &category.Color, &category.NoteCount)
+        if err != nil {
+            return nil, err
+        }
+        categories = append(categories, category)
+    }
 
-	return categories, rows.Err()
+    return categories, rows.Err()
 }

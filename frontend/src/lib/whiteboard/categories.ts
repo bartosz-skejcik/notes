@@ -5,6 +5,7 @@ export interface Category {
 	notebookId: number;
 	name: string;
 	color: string;
+	noteCount: number;
 }
 
 export async function getCategories(notebookId: string, sessionId: string): Promise<Category[]> {
