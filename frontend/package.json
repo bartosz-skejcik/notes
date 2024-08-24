@@ -15,6 +15,7 @@
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
+		"@tailwindcss/typography": "^0.5.14",
 		"@types/eslint": "^9.6.0",
 		"@types/js-cookie": "^3.0.6",
 		"autoprefixer": "^10.4.20",
@@ -46,6 +47,7 @@
 		"cmdk-sv": "^0.0.18",
 		"js-cookie": "^3.0.5",
 		"lucide-svelte": "^0.427.0",
+		"svelte-exmarkdown": "^3.0.5",
 		"svelte-radix": "^1.1.0",
 		"tailwind-merge": "^2.4.0",
 		"tailwind-variants": "^0.2.1"

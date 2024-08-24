@@ -2,16 +2,51 @@
 	import ThemeSwitcher from '$components/theme-switcher.svelte';
 
 	import { Button } from '$ui/button';
-	import { Home, Plus, Settings, Trash } from 'lucide-svelte';
+	import { ChevronLeft, Home, Plus, Settings, Trash } from 'lucide-svelte';
+	import { fly } from 'svelte/transition';
+
+	type Props = {
+		onOpen: () => void;
+		onClose: () => void;
+		view: string;
+		open: boolean;
+	};
+
+	let { onOpen, onClose, view, open }: Props = $props();
 </script>
 
-<nav class="sticky top-0 flex items-center justify-end px-3 py-2 z-4 bg-background">
+<nav
+	class={`sticky top-0 flex items-center  px-3 py-2 z-4 bg-background ${open ? 'justify-between' : 'justify-end'}`}
+>
+	{#if open}
+		<div transition:fly={{ x: -20, duration: 200 }}>
+			<Button variant="ghost" size="sm" onclick={onClose}>
+				<ChevronLeft class="w-4 h-4 mr-2" />
+				Back
+			</Button>
+		</div>
+	{/if}
 	<div class="flex items-center justify-center gap-4">
-		<Button variant="red_ghost" size="sm" class="border border-red-500/20">
+		<Button
+			variant="red_ghost"
+			size="sm"
+			class={`border border-red-500/20 ${view == 'recent' || view == 'all' ? 'hidden' : 'flex'}`}
+		>
 			<Trash class="w-4 h-4 mr-2" />
-			Delete
+			Delete category
 		</Button>
-		<Button variant="outline" size="sm">
+		<Button
+			variant="outline"
+			size="sm"
+			onclick={() => {
+				if (open) {
+					onClose();
+				} else {
+					onOpen();
+				}
+			}}
+			class={`${view == 'recent' || view == 'all' ? 'hidden' : 'flex'}`}
+		>
 			<Plus class="w-4 h-4 mr-2" />
 			Add item
 		</Button>

@@ -3,6 +3,7 @@
 	import * as Card from '$ui/card';
 	import { hexToRGBA } from '$lib/whiteboard/utils';
 	import type { StickyNote } from '$lib/whiteboard/sticky_notes';
+	import Markdown from 'svelte-exmarkdown';
 
 	type Props = {
 		categories: Category[];
@@ -33,7 +34,13 @@
 			<p>{category.name}</p>
 		</div>
 		<Card.Title class="text-lg">{sticky_note.title}</Card.Title>
-		<Card.Description class="text-foreground">{sticky_note.content}</Card.Description>
+		<Card.Description class="prose text-foreground">
+			<Markdown
+				md={sticky_note.content.length > 50
+					? sticky_note.content.slice(0, 50) + '...'
+					: sticky_note.content}
+			/>
+		</Card.Description>
 	</Card.Header>
 	<Card.Footer class="px-4 py-3">
 		<p class="text-xs text-foreground/70">

@@ -58,15 +58,19 @@ export async function createStickyNote(
 	title: string,
 	content: string
 ): Promise<{ id: number } | null> {
-	const res = await api.post(`/api/notebooks/${notebookId}/categories/${categoryId}/sticky-notes`, {
-		headers: {
-			Authorization: `Bearer ${sessionId}`
-		},
-		data: {
+	const res = await api.post(
+		`/api/notebooks/${notebookId}/categories/${categoryId}/sticky-notes`,
+		{
 			title,
 			content
+		},
+		{
+			headers: {
+				Authorization: `Bearer ${sessionId}`,
+				'Content-Type': 'application/json'
+			}
 		}
-	});
+	);
 
 	if (res.status === 200) {
 		return res.data;
