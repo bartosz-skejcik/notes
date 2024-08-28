@@ -6,13 +6,12 @@
 	import { fly } from 'svelte/transition';
 
 	type Props = {
-		onOpen: () => void;
 		onClose: () => void;
 		view: string;
 		open: boolean;
 	};
 
-	let { onOpen, onClose, view, open }: Props = $props();
+	let { onClose, view, open }: Props = $props();
 </script>
 
 <nav
@@ -34,21 +33,6 @@
 		>
 			<Trash class="w-4 h-4 mr-2" />
 			Delete category
-		</Button>
-		<Button
-			variant="outline"
-			size="sm"
-			onclick={() => {
-				if (open) {
-					onClose();
-				} else {
-					onOpen();
-				}
-			}}
-			class={`${view == 'recent' || view == 'all' ? 'hidden' : 'flex'}`}
-		>
-			<Plus class="w-4 h-4 mr-2" />
-			Add item
 		</Button>
 		<div class="flex items-center justify-center gap-3">
 			<ThemeSwitcher />

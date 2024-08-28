@@ -19,6 +19,26 @@
 	body {
 		@apply bg-background/100 text-foreground;
 	}
+
+	#markdown-editor > h1 {
+		@apply text-3xl font-bold text-foreground;
+	}
+
+	#markdown-editor > h2 {
+		@apply mb-0.5 text-2xl font-bold text-foreground !important;
+	}
+
+	#markdown-editor > h3 {
+		@apply mb-0.5 text-xl font-bold text-foreground !important;
+	}
+
+	#markdown-editor > h4 {
+		@apply mb-0.5 text-lg font-bold text-foreground !important;
+	}
+
+	#markdown-editor > li {
+		list-style-type: disc !important;
+	}
 }
 
 /* style the scrollbar */

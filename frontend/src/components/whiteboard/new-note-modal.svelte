@@ -6,6 +6,8 @@
 
 	const plugins = [gfmPlugin()];
 
+	const theme = localStorage.getItem('theme');
+
 	type Props = {
 		onSubmit: (e: Event) => void;
 		title: string;
@@ -40,7 +42,8 @@
 			rows={10}
 		></textarea>
 		<article
-			class="grid w-1/2 h-full grid-cols-1 grid-rows-1 prose place-items-start text-muted-foreground"
+			id="markdown-editor"
+			class={`grid w-1/2 h-full grid-cols-1 prose grid-rows-1 place-items-start text-foreground`}
 		>
 			<Markdown md={content} {plugins} />
 		</article>
