@@ -6,7 +6,7 @@
 
 	const plugins = [gfmPlugin()];
 
-	const theme = localStorage.getItem('theme');
+	// const theme = localStorage.getItem('theme');
 
 	type Props = {
 		onSubmit: (e: Event) => void;

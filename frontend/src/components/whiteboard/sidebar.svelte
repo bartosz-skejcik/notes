@@ -6,7 +6,7 @@
 	type Props = {
 		categories: Category[];
 		view: string;
-		onClose: () => void;
+		onClose: (modal: 'new_note' | 'editor') => void;
 	};
 
 	let { categories, view, onClose }: Props = $props();
@@ -28,14 +28,14 @@
 	</header>
 	<div class="flex flex-col items-start justify-start w-full mb-2 gap-y-1">
 		<a
-			onclick={onClose}
+			onclick={() => onClose('new_note')}
 			href="?view=recent"
 			class={`flex items-center justify-start gap-1 py-1 text-sm text-foreground ${view === 'recent' ? 'font-medium' : 'font-normal text-foreground/70'}`}
 		>
 			Recents
 		</a>
 		<a
-			onclick={onClose}
+			onclick={() => onClose('new_note')}
 			href="?view=all"
 			class={`flex items-center justify-start gap-1 py-1 text-sm text-foreground ${view === 'all' ? 'font-medium' : 'font-normal text-foreground/70'}`}
 		>
@@ -52,7 +52,7 @@
 				<Plus class="w-4 h-4" />
 			</Button>
 			<!-- big add category button -->
-			<a onclick={onClose} href="?open=true">
+			<a onclick={() => onClose('new_note')} href="?open=true">
 				<Button variant="ghost" class="px-2 text-xs h-7">
 					<Plus class="w-4 h-4 mr-2" />
 					Add
@@ -61,7 +61,7 @@
 		</div>
 		{#each categories as category}
 			<a
-				onclick={onClose}
+				onclick={() => onClose('new_note')}
 				href="?view={category.id}"
 				class={`flex items-center justify-start gap-2 py-1 text-sm w-full ${
 					category.id.toString() === view

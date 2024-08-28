@@ -2,24 +2,37 @@
 	import ThemeSwitcher from '$components/theme-switcher.svelte';
 
 	import { Button } from '$ui/button';
-	import { ChevronLeft, Home, Plus, Settings, Trash } from 'lucide-svelte';
+	import { ChevronLeft, Home, Settings, Trash } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';
 
 	type Props = {
-		onClose: () => void;
+		onClose: (modal: 'new_note' | 'editor') => void;
 		view: string;
 		open: boolean;
+		editorOpen: number | null;
 	};
 
-	let { onClose, view, open }: Props = $props();
+	let { onClose, view, open, editorOpen }: Props = $props();
 </script>
 
 <nav
-	class={`sticky top-0 flex items-center  px-3 py-2 z-4 bg-background ${open ? 'justify-between' : 'justify-end'}`}
+	class={`sticky top-0 flex items-center  px-3 py-2 z-4 bg-background ${open || editorOpen !== null ? 'justify-between' : 'justify-end'}`}
 >
-	{#if open}
+	{#if open || editorOpen !== null}
 		<div transition:fly={{ x: -20, duration: 200 }}>
-			<Button variant="ghost" size="sm" onclick={onClose}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={() => {
+					if (open) {
+						onClose('new_note');
+					}
+
+					if (editorOpen) {
+						onClose('editor');
+					}
+				}}
+			>
 				<ChevronLeft class="w-4 h-4 mr-2" />
 				Back
 			</Button>

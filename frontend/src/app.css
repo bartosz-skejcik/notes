@@ -25,15 +25,15 @@
 	}
 
 	#markdown-editor > h2 {
-		@apply mb-0.5 text-2xl font-bold text-foreground !important;
+		@apply mb-0.5 text-2xl font-bold text-foreground;
 	}
 
 	#markdown-editor > h3 {
-		@apply mb-0.5 text-xl font-bold text-foreground !important;
+		@apply mb-0.5 text-xl font-bold text-foreground;
 	}
 
 	#markdown-editor > h4 {
-		@apply mb-0.5 text-lg font-bold text-foreground !important;
+		@apply mb-0.5 text-lg font-bold text-foreground;
 	}
 
 	#markdown-editor > li {
