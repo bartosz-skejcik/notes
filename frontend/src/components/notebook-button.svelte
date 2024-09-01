@@ -1,28 +1,30 @@
 <script lang="ts">
-	import { ChevronDown, NotebookTabs, Presentation, StickyNote, Trash } from 'lucide-svelte/icons';
+	import { ChevronDown, NotebookTabs, StickyNote, Trash } from 'lucide-svelte/icons';
 	import { Button } from '$ui/button';
 	import type { Notebook } from '../routes/+page.server';
 	import { slide } from 'svelte/transition';
 	import { cubicInOut } from 'svelte/easing';
+	import { useNotebooksStore } from '$stores/notebook.svelte';
 
 	type Props = {
-		notebooks: Notebook[];
 		notebook: Notebook;
 		i: number;
 		open: boolean;
 		toggleNotebook: (i: number) => void;
 	};
 
-	let { notebook, notebooks, i, open, toggleNotebook }: Props = $props();
+	let { notebook, i, open, toggleNotebook }: Props = $props();
 
 	function navigate(path: string) {
 		window.location.href = path;
 	}
+
+	let notebookStore = useNotebooksStore();
 </script>
 
 <button
 	onclick={() => toggleNotebook(i)}
-	class={`relative flex-col flex items-center justify-center w-full gap-2 pt-1 pb-2 pl-3 pr-2 bg-accent opacity-80 hover:opacity-100 group ${i == notebooks.length - 1 ? 'rounded-b-lg' : i == 0 ? 'rounded-t-lg' : ''}`}
+	class={`relative flex-col flex items-center justify-center w-full gap-2 pt-1 pb-2 pl-3 pr-2 bg-accent opacity-80 hover:opacity-100 group ${i == notebookStore.notebooks.length - 1 ? 'rounded-b-lg' : i == 0 ? 'rounded-t-lg' : ''}`}
 >
 	<div class="flex items-center justify-between w-full gap-2">
 		<div class="relative z-20 flex flex-col items-start justify-center">

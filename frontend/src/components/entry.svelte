@@ -2,7 +2,7 @@
 
 <script lang="ts">
 	import { addChildEntry, convertEntriesToLocal } from '$lib/entry';
-	import type { Entry, LocalEntryType } from '$lib/entry';
+	import type { Entry } from '$lib/entry';
 	import { Check, X } from 'lucide-svelte';
 	import { Button } from '$ui/button';
 	import EntryForm from './entry-form.svelte';
@@ -12,37 +12,39 @@
 	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { quintOut } from 'svelte/easing';
+	import { useEntriesStore } from '$stores/entries.svelte';
 
 	type Props = {
-		entries: Entry[];
 		entry: Entry;
-		slug: string | undefined;
 		sessionId: string;
-		notebook: Notebook;
+		slug: string | undefined;
 		tags: Tag[] | null;
+		notebook: Notebook;
 	};
+
+	let { entry, sessionId, slug, tags, notebook }: Props = $props();
+
+	const entriesStore = useEntriesStore();
 
 	let pendingAIResponseAccept = $state<boolean | null>(null);
 	let addChildEntryPending = $state<boolean | null>(false);
-
-	let { entries = $bindable(), entry, ...data }: Props = $props();
 
 	let localEntries = $derived(convertEntriesToLocal(entry));
 
 	async function acceptAIResponse() {
 		const e = localEntries[localEntries.length - 1];
 
-		if (!data.slug) {
-			console.log(data.slug);
+		if (!slug) {
+			console.log(slug);
 			return;
 		}
 
-		if (!data.sessionId) {
-			console.log(data.sessionId);
+		if (!sessionId) {
+			console.log(sessionId);
 			return;
 		}
 
-		await addChildEntry(data.sessionId, data.slug, entry.id, {
+		await entriesStore.addChildEntry(sessionId, slug, entry.id, {
 			title: e.content,
 			role: 'assistant',
 			tag_id: entry.tag_id,
@@ -64,35 +66,21 @@
 		if (!entry.children) {
 			console.log('entry.children is null');
 			entry.children = [];
-
-			entry.children.push({
-				notebook_id: entry.notebook_id,
-				id: entry.id + 1,
-				role: 'assistant',
-				author_id: entry.author_id,
-				title: '',
-				content: '',
-				timestamp: new Date().toISOString(),
-				has_photo: false,
-				children: [],
-				parent_entry_id: entry.id,
-				tag_id: entry.tag_id
-			});
-		} else {
-			entry.children.push({
-				notebook_id: entry.notebook_id,
-				id: entry.id + 1,
-				role: 'assistant',
-				author_id: entry.author_id,
-				title: '',
-				content: '',
-				timestamp: new Date().toISOString(),
-				has_photo: false,
-				children: [],
-				parent_entry_id: entry.id,
-				tag_id: entry.tag_id
-			});
 		}
+
+		entry.children.push({
+			notebook_id: entry.notebook_id,
+			id: entry.id + 1,
+			role: 'assistant',
+			author_id: entry.author_id,
+			title: '',
+			content: '',
+			timestamp: new Date().toISOString(),
+			has_photo: false,
+			children: [],
+			parent_entry_id: entry.id,
+			tag_id: entry.tag_id
+		});
 
 		const res = await fetch('/api/chat', {
 			method: 'POST',
@@ -144,8 +132,6 @@
 		}
 		pendingAIResponseAccept = true;
 	}
-
-	$inspect(localEntries);
 </script>
 
 <div class="flex flex-col items-start justify-center w-full group">
@@ -155,15 +141,13 @@
 				{localEntries}
 				bind:addChildEntryPending
 				bind:entry
-				bind:entries
 				{i}
 				{e}
 				{pendingAIResponseAccept}
 				{streamResponse}
-				tags={data.tags}
-				sessionId={data.sessionId}
-				slug={data.slug}
-				notebook={data.notebook}
+				{tags}
+				{sessionId}
+				{slug}
 			/>
 		</div>
 	{/each}
@@ -189,27 +173,27 @@
 		<div transition:fly={{ y: -20, duration: 300 }} class={`flex items-start w-full gap-2`}>
 			<div class="flex flex-col items-center justify-start w-10 gap-2 pb-2 pr-1">
 				<div
-					style={data.tags?.filter((t) => t.id === entry.tag_id)[0]?.value !== 'none'
-						? `background-color: rgb(var(${data.tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`
-						: `background-color: hsl(var(${data.tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`}
+					style={tags?.filter((t) => t.id === entry.tag_id)[0]?.value !== 'none'
+						? `background-color: rgb(var(${tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`
+						: `background-color: hsl(var(${tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`}
 					class="w-[4px] rounded-b-full flex-1 min-h-5"
 				></div>
 				<button
-					style={data.tags?.filter((t) => t.id === entry.tag_id)[0]?.value !== 'none'
-						? `background-color: rgb(var(${data.tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`
-						: `background-color: hsl(var(${data.tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`}
+					style={tags?.filter((t) => t.id === entry.tag_id)[0]?.value !== 'none'
+						? `background-color: rgb(var(${tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`
+						: `background-color: hsl(var(${tags?.filter((t) => t.id === entry.tag_id)[0]?.color}));`}
 					class="flex items-center justify-center w-6 h-6 rounded-full dark:bg-muted bg-muted-foreground/50 aspect-square"
 				>
 				</button>
 			</div>
 			<div class="flex-1 pt-3 -ml-3">
 				<EntryForm
-					{...data}
-					bind:entries
-					bind:entry
 					childEntry={true}
-					{localEntries}
 					onClose={() => (addChildEntryPending = false)}
+					{entry}
+					entryId={entry.id}
+					{slug}
+					{sessionId}
 				/>
 			</div>
 		</div>

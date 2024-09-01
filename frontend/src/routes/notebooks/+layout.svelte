@@ -8,7 +8,7 @@
 
 <div class="grid w-full h-screen grid-cols-5 overflow-hidden">
 	<aside class="relative col-span-1 bg-muted">
-		<Sidebar entries={data.entries} />
+		<Sidebar {...data} />
 	</aside>
 	<main class="col-span-4 overflow-auto">
 		{@render children()}

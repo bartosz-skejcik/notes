@@ -195,7 +195,6 @@ export async function updateChildEntry(
 	childEntryId: number,
 	childEntry: NewChildEntry
 ): Promise<Entry | null> {
-	console.log(childEntryId, childEntry);
 	try {
 		const res = await api.patch(
 			`/api/notebooks/${slug}/entries/${entryId}/children/${childEntryId}`,

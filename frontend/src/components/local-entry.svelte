@@ -1,3 +1,5 @@
+<!-- file: src/components/local-entry.svelte -->
+
 <script lang="ts">
 	import { Stars } from 'lucide-svelte';
 	import { Button } from '$ui/button';
@@ -14,12 +16,11 @@
 	import type { Tag } from '$lib/tags';
 	import { fly } from 'svelte/transition';
 	import EntryForm from './entry-form.svelte';
-	import type { Notebook } from '../routes/notebooks/[slug]/+page.server';
+	import { useEntriesStore } from '$stores/entries.svelte';
 
 	type Props = {
 		localEntries: LocalEntryType[];
 		addChildEntryPending: boolean | null;
-		entries: Entry[];
 		pendingAIResponseAccept: boolean | null;
 		i: number;
 		e: LocalEntryType;
@@ -28,13 +29,11 @@
 		sessionId: string;
 		slug: string | undefined;
 		entry: Entry;
-		notebook: Notebook;
 	};
 
 	let {
 		localEntries,
 		addChildEntryPending = $bindable(),
-		entries = $bindable(),
 		i,
 		e,
 		pendingAIResponseAccept,
@@ -42,9 +41,10 @@
 		tags,
 		entry = $bindable(),
 		sessionId,
-		slug,
-		notebook
+		slug
 	}: Props = $props();
+
+	let entriesStore = useEntriesStore();
 
 	let selectedTag = $derived(tags && tags.filter((t) => t.id === e.tag_id)[0]);
 	let sTag = $state<Tag | undefined>();
@@ -53,45 +53,64 @@
 
 	$effect(() => {
 		if (sTag) {
-			// change the tag_id for the entry for the e.id
-			entry.tag_id = sTag!.id;
-			// TODO: update entry on the server
 			(async () => {
-				if (!slug) return;
-				await updateEntry(sessionId, slug, entry.id, {
-					title: entry.title,
-					role: entry.role,
-					tag_id: selectedTag!.id
-				});
+				await updateEntryTag(entry, sTag);
+				console.log('updated entry tag');
 			})();
-			if (entry.children.length > 0) {
-				console.log('entry.children.length > 0');
-				entry.children.forEach((ent) => {
-					ent.tag_id = sTag!.id;
-					// TODO: update child entry on the server
-					(async () => {
-						if (!slug) return;
-						if (!ent.parent_entry_id) return;
-						await updateChildEntry(sessionId, slug, ent.parent_entry_id, ent.id, {
-							title: ent.title,
-							role: ent.role,
-							tag_id: selectedTag!.id
-						});
-					})();
-				});
-			}
 		}
 	});
 
-	function deleteParentEntry(id: number) {
-		const entryToDelete = localEntries.find((e) => e.id === id);
+	async function updateEntryTag(entryToUpdate: Entry, newTag: Tag) {
+		if (!slug) return;
 
-		if (entryToDelete) {
-			localEntries.filter((e) => e.id !== id);
-			console.log('deleted entry', id);
-		} else {
-			console.log('entries', localEntries);
-			console.log('entry not found', id);
+		entriesStore.entries.forEach(async (entry) => {
+			if (entry.id === entryToUpdate.id) {
+				// Update parent entry
+				entry.tag_id = newTag.id;
+				await updateEntry(sessionId, slug, entry.id, {
+					title: entry.title,
+					role: entry.role,
+					tag_id: newTag.id
+				});
+
+				// Update child entries
+				if (entry.children && entry.children.length > 0) {
+					for (const childEntry of entry.children) {
+						childEntry.tag_id = newTag.id;
+						await updateChildEntry(sessionId, slug, childEntry.parent_entry_id!, childEntry.id, {
+							title: childEntry.title,
+							role: childEntry.role,
+							tag_id: newTag.id
+						});
+					}
+				}
+			}
+		});
+	}
+
+	function deleteParentEntry(id: number) {
+		editEntryPending = false;
+		if (slug) {
+			entriesStore.deleteEntry(sessionId, slug, id);
+		}
+	}
+
+	function getTagColor(tag: Tag | undefined) {
+		return tag?.value !== 'none'
+			? `background-color: rgb(var(${tag?.color}));`
+			: `background-color: hsl(var(${tag?.color}));`;
+	}
+
+	function getTagTextColor(tagValue: string | undefined) {
+		switch (tagValue) {
+			case 'do-later':
+				return 'text-green-600';
+			case 'highlight':
+				return 'text-orange-600';
+			case 'new-idea':
+				return 'text-blue-600';
+			default:
+				return 'text-muted-foreground/40';
 		}
 	}
 </script>
@@ -100,22 +119,12 @@
 	<Button
 		builders={[builder]}
 		size="icon"
-		style={selectedTag?.value !== 'none'
-			? `background-color: rgb(var(${selectedTag?.color}));`
-			: `background-color: hsl(var(${selectedTag?.color}));`}
+		style={getTagColor(selectedTag!)}
 		class="flex items-center justify-center w-6 h-6 rounded-full aspect-square"
 	>
 		{#if e.role === 'assistant'}
 			<Stars
-				class={`w-4/5 h-4/5 text-muted-foreground/40 ${
-					selectedTag?.value === 'do-later'
-						? `text-green-600`
-						: selectedTag?.value === 'highlight'
-							? `text-orange-600`
-							: selectedTag?.value === 'new-idea'
-								? `text-blue-600`
-								: `text-muted-foreground/40`
-				}`}
+				class={`w-4/5 h-4/5 text-muted-foreground/40 ${getTagTextColor(selectedTag?.value)}`}
 			/>
 		{/if}
 	</Button>
@@ -127,9 +136,7 @@
 		{#if i !== localEntries.length - 1 || addChildEntryPending === true}
 			<div
 				transition:fly={{ y: -20, duration: 200 }}
-				style={selectedTag?.value !== 'none'
-					? `background-color: rgb(var(${selectedTag?.color}));`
-					: `background-color: hsl(var(${selectedTag?.color}));`}
+				style={getTagColor(selectedTag!)}
 				class={`w-[4px] ${addChildEntryPending == true ? 'rounded-t-full' : 'rounded-full'} flex-1 min-h-5`}
 			></div>
 		{/if}
@@ -154,15 +161,11 @@
 			{/if}
 		{:else}
 			<EntryForm
-				bind:entries
-				bind:entry
+				{entry}
 				childEntry={typeof e.parent_entry_id === 'number'}
-				{localEntries}
 				onClose={() => (editEntryPending = false)}
 				{sessionId}
 				{slug}
-				{tags}
-				{notebook}
 				{editEntryPending}
 				content={e.content}
 				entryId={e.id}

@@ -1,28 +1,11 @@
 // file: src/routes/notebooks/[slug]/+page.server.ts
 
-import api from '$lib/api';
-import { fetchTags } from '$lib/tags';
 import { redirect, type ServerLoadEvent } from '@sveltejs/kit';
 
 export type Notebook = {
 	id: string;
 	user_id: string;
 	name: string;
-};
-
-const getNotebook = async (sessionId: string, slug: string): Promise<Notebook> => {
-	const res = await api.get(`/api/notebooks/${slug}`, {
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${sessionId}`
-		}
-	});
-
-	if (res.status === 200) {
-		return res.data;
-	} else {
-		throw redirect(302, '/login');
-	}
 };
 
 export async function load(event: ServerLoadEvent) {
@@ -32,16 +15,8 @@ export async function load(event: ServerLoadEvent) {
 		throw redirect(302, '/login');
 	}
 
-	const slug = event.params.slug as string;
-
-	const notebook = await getNotebook(sessionId, slug);
-
-	const tags = await fetchTags(sessionId);
-
 	return {
 		sessionId,
-		slug: event.params.slug,
-		notebook,
-		tags
+		slug: event.params.slug
 	};
 }

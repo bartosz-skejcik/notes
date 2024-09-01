@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { Button } from '$ui/button';
-	import { ArrowRight, NotebookTabs, Presentation, Trash } from 'lucide-svelte/icons';
+	import { ArrowRight } from 'lucide-svelte/icons';
 	import type { PageData } from '../../routes/$types';
 	import NotebookButton from '$components/notebook-button.svelte';
+	import { useNotebooksStore } from '$stores/notebook.svelte';
+	import { onMount } from 'svelte';
 
-	let { notebooks, session }: PageData = $props();
+	let { session, sessionId }: PageData = $props();
 
 	function handleClick() {
 		window.location.href = '/new-notebook';
 	}
+
+	let notebookStore = useNotebooksStore();
 
 	let openedNotebook = $state<number | null>(null);
 
@@ -19,6 +23,14 @@
 			openedNotebook = i;
 		}
 	}
+
+	onMount(async () => {
+		if (notebookStore && sessionId) {
+			await notebookStore.getNotebooks(sessionId);
+		}
+	});
+
+	$inspect(notebookStore.notebooks);
 </script>
 
 <main
@@ -36,15 +48,15 @@
 		<ArrowRight class="w-4 h-4" />
 	</Button>
 	<div class="flex flex-col items-center w-full max-w-xs space-y-4">
-		{#if notebooks.length > 0}
+		{#if notebookStore.notebooks.length > 0}
 			<p class="text-muted-foreground">or open an existing one</p>
 		{/if}
 		<div
 			class="relative z-10 flex flex-col items-center justify-center w-full rounded-lg gap-y-0.5 divide-background"
 		>
-			{#if notebooks}
-				{#each notebooks! as notebook, i}
-					<NotebookButton {notebook} {notebooks} {i} {toggleNotebook} open={openedNotebook === i} />
+			{#if notebookStore.notebooks}
+				{#each notebookStore.notebooks! as notebook, i}
+					<NotebookButton {notebook} {i} {toggleNotebook} open={openedNotebook === i} />
 				{/each}
 			{/if}
 		</div>

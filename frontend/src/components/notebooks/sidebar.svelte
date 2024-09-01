@@ -1,19 +1,27 @@
 <!-- file: src/components/sidebar.svelte -->
 <script lang="ts">
 	import { convertEntriesToLocal } from '$lib/entry';
-	import type { Entry, LocalEntryType } from '$lib/entry';
+	import type { LocalEntryType } from '$lib/entry';
+	import { useEntriesStore } from '$stores/entries.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {
-		entries: Entry[];
+		sessionId: string | null;
+		slug: string | null;
 	};
-	let { entries }: Props = $props();
+	let { sessionId, slug }: Props = $props();
 
 	let localEntries = $state<LocalEntryType[]>([]);
 
-	onMount(() => {
-		if (entries.length > 0) {
-			entries.forEach((e) => {
+	let entriesStore = useEntriesStore();
+
+	onMount(async () => {
+		if (sessionId && slug) {
+			await entriesStore.getEntries(sessionId, slug);
+		}
+
+		if (entriesStore.entries.length > 0) {
+			entriesStore.entries.forEach((e) => {
 				localEntries = convertEntriesToLocal(e);
 			});
 		}

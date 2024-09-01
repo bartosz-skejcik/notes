@@ -10,46 +10,36 @@
 	import { flip } from 'svelte/animate';
 
 	import { Settings, Home } from 'lucide-svelte';
-	import { fetchEntries } from '$lib/entry';
 	import type { Entry as EntryType } from '$lib/entry';
 	import Entry from '$components/entry.svelte';
 	import EntryForm from '$components/entry-form.svelte';
 	import { quintOut } from 'svelte/easing';
 	import Encuragement from '$components/encuragement.svelte';
-	import type { Notebook } from './+page.server';
-	import type { Tag } from '$lib/tags';
+	import { useEntriesStore } from '$stores/entries.svelte';
+	import { onMount } from 'svelte';
+	import { useNotebooksStore } from '$stores/notebook.svelte';
+	import { useTagsStore } from '$stores/tags.svelte';
 
 	type PageData = {
 		sessionId: string;
 		slug: string;
-		notebook: Notebook;
-		tags: Tag[];
 	};
 
 	let { data }: { data: PageData } = $props();
 
 	const search = createSearch();
 
-	// let entryStore = $state(createEntryStore(data.sessionId, data.slug));
+	let entriesStore = useEntriesStore();
+	let notebookStore = useNotebooksStore();
+	let tagsStore = useTagsStore();
 
-	let fetchedEntries = $state<EntryType[]>([]);
-
-	$effect(() => {
-		(async () => {
-			if (data.slug) {
-				const e = await fetchEntries({ sessionId: data.sessionId, slug: data.slug });
-				fetchedEntries = e as EntryType[];
-			}
-		})();
-	});
-
-	$effect(() => {
-		if (fetchedEntries.length > 0) {
-			entries = fetchedEntries;
+	onMount(async () => {
+		if (data.sessionId && data.slug) {
+			await entriesStore.getEntries(data.sessionId, data.slug);
+			await notebookStore.getNotebook(data.sessionId, data.slug);
+			await tagsStore.getTags(data.sessionId);
 		}
 	});
-
-	let entries = $state<EntryType[]>([]);
 
 	function convertEntriesToItems(entries: EntryType[]): {
 		label: string;
@@ -83,7 +73,7 @@
 
 <nav class="sticky top-0 flex items-center justify-between px-3 py-2 z-4 bg-background">
 	<div class="flex items-center gap-2 text-[0.97rem] text-muted-foreground">
-		<p>{data.notebook.name}</p>
+		<p>{notebookStore.notebook?.name}</p>
 		<span>•</span>
 		<p>
 			{new Date().toLocaleString('en-PL', {
@@ -95,7 +85,7 @@
 		</p>
 	</div>
 	<div class="flex items-center justify-end w-1/2 gap-4">
-		<CommandSearch items={convertEntriesToItems(entries)} onChange={search.setValue} />
+		<CommandSearch items={convertEntriesToItems(entriesStore.entries)} onChange={search.setValue} />
 		<div class="flex items-center justify-center gap-3">
 			<ThemeSwitcher />
 			<Button size="icon" variant="ghost" class={'relative text-muted-foreground w-8 h-8'}>
@@ -113,13 +103,13 @@
 	</div>
 </nav>
 <div class="p-3 pb-20 space-y-1">
-	<EntryForm {...data} bind:entries />
-	{#each entries as entry, i (i)}
+	<EntryForm {...data} sessionId={data.sessionId} slug={data.slug} />
+	{#each entriesStore.entries as entry, i (i)}
 		<div animate:flip={{ duration: 300, easing: quintOut }} class="w-full">
-			<Entry bind:entries {entry} {...data} tags={data.tags} />
+			<Entry {entry} {...data} tags={tagsStore.tags} notebook={notebookStore.notebook!} />
 		</div>
 	{/each}
-	{#if entries.length === 0}
+	{#if entriesStore.entries.length === 0}
 		<Encuragement />
 	{/if}
 </div>
